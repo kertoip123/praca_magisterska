@@ -1,0 +1,43 @@
+\chapter{Ewaluacja zaimplementowanych algorytmów}
+\label{cha:ewaluacja}
+
+\section{Metodologia przeprowadzonych testów}
+\label{sec:metodologia_testow}
+
+Testy algorytmów opracowanych w Laboratorium Biocybernetyki AGH, zostały przeprowadzone zgodnie z metodologią opisaną w \cite{changedetection_15}. Sekwencje testowe pochodzą z bazy \textit{ChangeDetection} \cite{change_detection_web}. Tego typu podejście do ewaluacji zaimplementowanych algorytmów zostało wykorzystane między innymi w~\cite{kryjak_14_vibe, kryjak_14_pbas, janus_15}. Wszystkie metody zostały przetestowane z wykorzystaniem 31 sekwencji testowych podzielonych na 6 różnych kategorii. Zbiór testowy został tak dobrany, aby odwzorować jak największą liczbę sytuacji mogących wystąpić w rzeczywistym środowisku. Każda z kategorii została szczegółowo opisana w rozdziale \ref{sec:testy}.
+
+Dla każdej sekwencji testowej zawartej w bazie, dostępny jest model wzorcowy tj. ręcznie anotowana maska obiektów (ang. \textit{ground truth}). Wzorzec zapisany jest jako obraz w skali szarości, gdzie piksele przyjmują jedną z pięciu wartości:
+
+\begin{eqwhere}[2cm]
+	\item[$0$] tło
+	\item[$50$] cienie
+	\item[$85$] obszar wyłączony z analizy
+	\item [$175$] obszar trudny do zidentyfikowania (np. kontur otaczający ruchomy obiekt)
+	\item [$255$] obiekt pierwszoplanowy \\
+\end{eqwhere}  
+
+\noindent Porównując ramki wyjściowe testowanego algorytmu z odpowiadającymi im ramkami modelu wzorcowego, można wyznaczyć następujące współczynniki:
+\begin{eqwhere}[2cm]
+	\item[$\small TP$] liczba pikseli poprawnie zakwalifikowanych jako pierwszy plan (ang. \textit{true positive})
+	\item[$\small TN$] liczba pikseli poprawnie zakwalifikowanych jako tło (ang. \textit{true negative})
+	\item[$\small FN$] liczba pikseli błędnie zakwalifikowanych jako tło (ang. \textit{false negative})
+	\item[$\small FP$] liczba pikseli błędnie zakwalifikowanych jako pierwszy plan (ang. \textit{false positive})\\
+\end{eqwhere}
+
+\noindent Na podstawie wyznaczonych otrzymanych współczynników oblicza się 7 wskaźników jakości, określających dokładność metody:
+%
+\TabPositions{0.45\linewidth}
+\begin{enumerate}[nolistsep]
+	\item \textit{Recall (Re)} : \tab \small{$TP/(TP+FN)$}
+	\item \textit{Specificity (Spec)} : \tab \small{$TN/(TN+FP)$}
+	\item \textit{False Positive Rate (FPR)} : \tab \small{$FP/(FP + TN)$}
+	\item \textit{False Negative Rate (FNR)} : \tab \small{$FN/(FN + TP)$}
+	\item \textit{Percentage of Wrong Classifications (PWC)} : \tab \small{$100(FN + FP)/(TP + FN + FP + TN)$}
+	\item \textit{Precision (Pr)} : \tab \small{$TP/(TP + FP)$}
+	\item \textit{F-measure (F1)} : \tab \small{$2\frac{P_r*R_e}{P_r+R_r}$}\\
+\end{enumerate}
+
+Parametr \textit{Re} definiuje jaki procent pikseli pierwszoplanowych został rozpoznany. Analogiczną wartość dla pikseli reprezentujących tło określa parametr \textit{Se}. Parametry \textit{FPR} i \textit{FNR} są przeciwieństwem wartości opisanych wyżej i wynoszą odpowiednio $1-Se$ i $1-Re$. \textit{PWC} określa procent źle sklasyfikowany pikseli, natomiast \textit{Pr} informuje jaki procent spośród pikseli sklasyfikowanych jako pierwszoplanowe został rozpoznany prawidłowo.
+
+\section{Szczegółowe test}
+\label{sec:testy}
