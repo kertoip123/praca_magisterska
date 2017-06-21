@@ -4,22 +4,42 @@
 \section{Modele programowe}
 \label{sec:modele_programowe}
 
+Przed przystąpieniem do implementacji sprzętowej, dla każdego algorytmu przygotowano także model programowy. Zostały one zaimplementowane w języku \textit{C++} z wykorzystaniem biblioteki \textit{OpenCV} \cite{opencv_17}. Całość przygotowano w środowisku programistycznym \textit{Microsoft Visual Studio 2015}. Głównym celem stworzonych implementacji jest przeprowadzenie szczegółowych testów poszczególnych algorytmów. Tematyka ta została szczerzej opisana w rozdziale \ref{cha:ewaluacja}, natomiast design poszczególnych algorytmów zaprezentowano w dodatku \ref{appx:opis_informatyczny}.
+
+Na rysunku \ref{fig:pbas_cpp} przedstawiono zrzut ekranu prezentujący działanie modelu programowego metody \textit{PBAS}. Aplikacja wyświetla cztery okna, na których przedstawione są kolejno: obraz wejściowy w przestrzeni RGB, wzorcowa maska wyjściowa (ang. \textit{ground truth}), efekt końcowy algorytmu \textit{PBAS}, wizualizacja rozszerzonej wersji tej metody. Rysunek \ref{fig:vibe_cpp} przedstawia z kolei działający algorytm \textit{ViBE}. Podobnie jak w poprzednim przypadku wyświetlane są cztery okna: wyjście, wzorzec, maska wyjściowa oraz wizualizacja przepływu optycznego.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.55]{img/4/pbas_module_cpp.png}
+        \caption{Model programowy metody \textit{PBAS}}
+	    \label{fig:pbas_cpp}
+    \end{figure}
+
+Wykonane implementacje oczywiście nie są w stanie zapewnić przetwarzania obrazu w czasie rzeczywistym. Rozdzielczość obrazu w wykorzystanych sekwencjach testowych zawiera się w przedziale od \textit{320x240} do \textit{720x576} pikseli. Nawet w przypadku tak niedużego obrazu otrzymana prędkość przetwarzania, w zależności od algorytmu, wahała się od kilku do co najwyżej kilkunastu klatek na sekundę. 
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.55]{img/4/vibe_module_cpp.png}
+        \caption{Model programowy metody \textit{ViBE}}
+	    \label{fig:vibe_cpp}
+    \end{figure}
+
+
 \section{Wykorzystany układ oraz interfejs wizyjny}
 \label{sec:uklad_interfejs}
 
-Do implementacji algorytmów wykorzystano środowisko \textit{Vivado}. Użyto najnowszej wersji, na moment tworzenia niniejszej pracy (czerwiec 2017), oznaczonej numerem \textit{2017.1}. Większość modułów zaimplementowano w języku \textit{Verilog}. W pojedynczych przypadkach wykorzystano również język \textit{VHDL}. Wszystkie metody uruchomiono i sprawdzono na płytce \textit{VC707} z układem \textit{Virtex-7 (\small{XC7VX485T--2FFG1761})}. Jest to jeden z najwydajniejszych układów firmy \textit{Xillinx}. Dodatkowo w celu podłączenia kamery i transmisji obrazu wykorzystano kartę \textit{Avnet DVI I/O FMC}. Przyjęto założenie, że zaimplementowane algorytmy mają pracować w rozdzielczość \textit{720x576} w 50 klatkach na sekundę. Opcjonalnie obsługiwana może być również rozdzielczość \textit{1280x720} i \textit{1920x1080}, również z prędkością \textit{50 fps} (ang. \textit{Frames Per Second} -- klatki na sekundę). 
-%Oprócz implementacji sprzętowych, dla każdego algorytmu przygotowano także model programowy. Modele te zostały zaimplementowane w języku \textit{C++} z wykorzystaniem biblioteki \textit{OpenCV} \cite{opencv_17}. Całość przygotowano w środowisku programistycznym \textit{Microsoft Visual Studio 2015}.
+Do implementacji algorytmów wykorzystano środowisko \textit{Vivado}. Użyto najnowszej wersji, na moment tworzenia niniejszej pracy (czerwiec 2017), oznaczonej numerem \textit{2017.1}. Większość modułów zaimplementowano w języku \textit{Verilog}. W pojedynczych przypadkach wykorzystano również język \textit{VHDL}. Wszystkie metody uruchomiono i sprawdzono na płytce \textit{VC707} z układem \textit{Virtex-7 (\small{XC7VX485T--2FFG1761})}. Jest to jeden z najwydajniejszych układów firmy \textit{Xillinx}. Dodatkowo w celu podłączenia kamery i transmisji obrazu wykorzystano kartę \textit{Avnet DVI I/O FMC}. Przyjęto założenie, że zaimplementowane algorytmy mają pracować w rozdzielczość \textit{720x576} w 50 klatkach na sekundę. Opcjonalnie obsługiwana może być również rozdzielczość \textit{1280x720} i \textit{1920x1080}, również z prędkością \textit{50 fps} (ang. \textit{Frames Per Second} -- klatki na sekundę). Ograniczeniem w przypadku wyższych rozdzielczości są głównie wielkości pamięci \textit{RAM}, którą można przeznaczyć na model tła, oraz wymagana częstotliwość zegara. Dla obrazu \textit{576p@50fps} wymagana jest praca układu z częstotliwością \num{27}MHz,. W przypadku rozdzielczości \textit{720p@50fps} oraz \textit{1080p@50fps} minimalna częstotliwość zegara musi wynosić już odpowiednio \num{74.25}MHz i \num{148.5}MHz.
 
 W przypadku implementacji sprzętowej w układzie \textit{FPGA} został wykorzystany uniwersalny interfejs wizyjny. Jego układ, przedstawiający podstawowe sygnały wejściowe i wyjściowe, został pokazany na rys. \ref{fig:fpga_vision_if}. Oprócz sygnałów wejściowych/wyjściowych z kamery, konieczne jest także zapewnienie niezależnego obszar pamięci \textit{RAM} dla każdego piksela. Maksymalnie do wykorzystania są 1024 bity na piksel w przypadku obrazu o rozdzielczości \textit{720x576} oraz 256 bitów dla wyższych rozdzielczości (\textit{720}p i \textit{1080}p). Sygnały pochodzące z kamery zostały szerzej opisane w rozdziale \ref{subsec:fpga_kontekst}. Należy zwrócić uwagę, że przedstawiony tutaj interfejs, zawiera jedynie niezbędne sygnały do funkcjonowania systemu. W przypadku niektórych algorytmów został on rozszerzony o dodatkowe wejścia/wyjścia. 
 
-		\begin{figure}[h!]
-				\centering
-				\includegraphics[scale=0.75]{img/4/vision_if.png}
-				\caption{Główny interfejs wizyjny}
-				\label{fig:fpga_vision_if}
-		\end{figure}
+	\begin{figure}[h!]
+			\centering
+			\includegraphics[scale=0.75]{img/4/vision_if.png}
+			\caption{Główny interfejs wizyjny}
+			\label{fig:fpga_vision_if}
+	\end{figure}
 
-\noindent \\Moduł przedstawiony na rys. \ref{fig:fpga_vision_if} posiada następujące sygnały wejściowe:\\
+\noindent Moduł przedstawiony na rys. \ref{fig:fpga_vision_if} posiada następujące sygnały wejściowe:\\
 \-\hspace{1cm} \textit{pixel\_in} -- wartość piksela wejściowego w formacie RGB (24 bity)\\
 \-\hspace{1cm} \textit{bg\_model\_in} -- odczytana pamięć RAM o długości \textit{WIDTH} (maksymalnie 1024 bity)\\
 \-\hspace{1cm} \textit{clk} -- zegar piksela\\
@@ -35,6 +55,40 @@ Natomiast sygnałami wyjściowymi są:\\
 \-\hspace{1cm} \textit{vs\_out} -- opóźniona flaga synchronizacji pionowej\\
 \-\hspace{1cm} \textit{ram\_read} -- sygnał odczytu pamięci RAM\\
 \-\hspace{1cm} \textit{ram\_write} -- sygnał zapisu do pamięci RAM\\
+
+Istotną kwestią jest również zużycie zasobów oraz pobór energii przez układ \textit{FPGA}. Jak łatwo zauważyć, sam interfejs wizyjny w połączeniu z kontrolerem pamięci \textit{RAM} jest zagadnieniem dość rozbudowanym. Tabela \ref{tab:sub_utilization} przedstawia zestawienie wykorzystanej logiki programowej w przypadku prostego algorytm odejmowania ramek. Oszacowany pobór mocy wynosi natomiast \num{2.804}W. Odejmowanie ramek jest najprostszą metodą zaimplementowaną w niniejszej pracy, jej szczegółowy opis zamieszczono w rozdziale \ref{sec:proste_metody}. Zaprezentowane tutaj zestawienie będzie stanowić punkt odniesienie dla bardziej zaawansowanych implementacji.  
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{Odejmowanie ramek - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:sub_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 9514 & 303600 & \num{3.13} \\		
+			\hline
+			\textbf{LUTRAM} & 1418 & 130800 & \num{1.08}  \\
+			\hline
+			\textbf{FF} & 9063 & 607200 & \num{1.49} \\
+			\hline
+			\textbf{BRAM} & 71 & 1030 & \num{6.89}  \\
+	        \hline		
+			\textbf{DSP} & 0 & 2800 & \num{0.0}  \\
+			\hline
+	%		\textbf{IO} & 176 & 700 & \num{25.15}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
 
 \section{Trudności występujące w potokowym systemie wizyjnym}
 \label{sec:fpga_wprowadzenie}
@@ -115,16 +169,81 @@ Dla poszczególnych próbek modelu obliczany jest dystans do aktualnego piksela 
 
 W procesie aktualizacji modelu wykorzystywany jest, $128$ bitowy, losowy sygnał otrzymany z bloku \textit{rng\_generator}. Idea działania generatora liczb losowych została szerzej opisana w rozdziale \ref{subsec:fpga_generator}. Modułu \textit{update\_arbitrator} jest wykorzystywany do podejmowania decyzji odnośnie aktualizacji. Sama aktualizacja wykonywana jest natomiast w bloku \textit{model\_updater}. W tym celu, generowany jest kontekst o rozmiarze $3x3$, zawierający modele tła sąsiadujących pikseli. Na podstawie informacji, otrzymanych z modułu \textit{update\_arbitrator}, aktualizowany jest model piksela oraz losowo wybranego sąsiada. Następnie nowy model zostaje zapisany do pamięci \textit{RAM}. Warto zwrócić uwagę, że model jest odczytywany z pamięci po konwersji do przestrzeni \textit{CIELab}, aby wykorzystać go w procesie aktualizacji, konieczne jest zastosowanie linii opóźniającej o długości równej latencji procesu klasyfikacji piksela, operacja ta została zrealizowana przez moduł \textit{delay}.
 
-Przedstawioną implementację udało się uruchomić w rozdzielczościach: \textit{576p}, \textit{720p}, \textit{1080p}. Na rysunku \ref{fig:vibe_demo} przedstawiono zdjęcie działającego systemu. W przypadku najniższej rozdzielczości przyjęto model składający się z $N=20$ próbek (rozmiar modelu wynosi w tym przypadku $20 \cdot 23=460$ bitów). Dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, musiał on zostać ograniczony do $10$ (rozmiar modelu równy $10 \cdot 23=230$ bity). Pozostałym parametrom przypisano wartości domyślne, zostały one zapisane jako liczny całkowite. Wyjątkiem jest parametr $T$, opisujący prawdopodobieństwo wykonania aktualizacji, w tym przypadku została wykorzystana 16 bitowa liczba stałoprzecinkowa (ang. \textit{fixed float}) bez znaku o oznaczeniu \textit{8z8u}, czyli po 8 bitów przeznaczonych na część całkowitą i ułamkową.
-
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.2]{img/4/vibe_example.png}
 		\caption{Działający algorytm \textit{ViBE}}
 		\label{fig:vibe_demo}
-	\end{figure}	
+	\end{figure}
+
+Przedstawioną implementację udało się uruchomić w rozdzielczościach: \textit{576p}, \textit{720p}, \textit{1080p} w 50 klatkach na sekundę. Na rysunku \ref{fig:vibe_demo} przedstawiono zdjęcie działającego systemu. W przypadku najniższej rozdzielczości przyjęto model składający się z $N=20$ próbek (rozmiar modelu wynosi w tym przypadku $20 \cdot 23=460$ bitów). Dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, musiał on zostać ograniczony do $10$ (rozmiar modelu równy $10 \cdot 23=230$ bity). Pozostałym parametrom przypisano wartości domyślne, zostały one zapisane jako liczny całkowite. Wyjątkiem jest parametr $T$, opisujący prawdopodobieństwo wykonania aktualizacji, w tym przypadku została wykorzystana 16 bitowa liczba stałoprzecinkowa (ang. \textit{fixed float}) bez znaku o oznaczeniu \textit{8z8u}, czyli po 8 bitów przeznaczonych na część całkowitą i ułamkową.
+
+Zużycie zasobów w układzie \textit{FPGA} zamieszczono w tabeli \ref{tab:vibe_utilization} i \ref{tab:vibe_hd_utilization}, odpowiednio dla rozdzielczości \textit{576p} oraz \textit{1080p}. Oszacowany w obu przypadkach pobór mocy wynosi \num{3.957}W i \num{3.370}W . Można zauważyć wyraźny wzrost wykorzystania dostępnych zasobów w stosunku do algorytmu odejmowania ramek (tabla \ref{tab:sub_utilization}), wynika to oczywiście ze zdecydowanie bardziej rozbudowanej logiki algorytmu. Na zdecydowanie większe użycie \textit{LUT} miało wpływ między innymi zastosowanie konwersji \textit{RGB}--\textit{CIELab}, gdzie konieczne było tablicowanie wartości niektórych funkcji. Pamięć \textit{BRAM} została z kolei wykorzystana w długich liniach opóźniających piksele jak i cały model tła. Warto jeszcze raz zaznaczyć, że w przypadku wyższej rozdzielczości konieczne było ograniczenie rozmiaru modelu (ze względu na ograniczenia zewnętrznej pamięci \textit{RAM}). W związku z tym, ostateczne zużycie zasobów w systemie pracującym w \textit{1080p@50fps} jest niższe niż dla \textit{576p@50fps}. 
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{\textit{ViBE 576p@50fps} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:vibe_utilization}
 	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 19774 & 303600 & \num{6.51} \\		
+			\hline
+			\textbf{LUTRAM} & 2083 & 130800 & \num{1.59}  \\
+			\hline
+			\textbf{FF} & 20936 & 607200 & \num{3.45} \\
+			\hline
+			\textbf{BRAM} & 207 & 1030 & \num{20.10}  \\
+	        \hline		
+			\textbf{DSP} & 54 & 2800 & \num{1.93}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{\textit{ViBE 1080p@50fps} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:vibe_hd_utilization}
 	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 16224 & 303600 & \num{5.34} \\		
+			\hline
+			\textbf{LUTRAM} & 2107 & 130800 & \num{1.61}  \\
+			\hline
+			\textbf{FF} & 16236 & 607200 & \num{2.67} \\
+			\hline
+			\textbf{BRAM} & 163 & 1030 & \num{15.83}  \\
+	        \hline		
+			\textbf{DSP} & 29 & 2800 & \num{1.04}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+			
 \section{Implementacja rozszerzonej wersji ViBE}
 \label{sec:fpga_vibe_plus}
 
@@ -169,6 +288,41 @@ Ostatnim krokiem, jest obliczenie mediany przesunięcia $dx$ i $dy$ wśród znal
 	\end{figure}
 	
 
+W tabeli \ref{tab:vibe_plus_utilization} zamieszczono zużycie zasobów w układzie \textit{FPGA}, oszacowany pobór mocy wynosi \num{4.011}W. W porównaniu do standardowej wersji algorytmu (tabela \ref{tab:vibe_utilization}) można zauważyć znaczący wzrost wykorzystania pamięci \textit{BRAM}. Algorytm obliczania przepływu optycznego wymaga dodatkowej pamięci, która wykorzystywana jest do przechowywania informacji z każdego bloku oraz do obliczania mediany. Wzrost zużycia pozostałych zasobów jest minimalny.
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{Rozszerzony algorytm \textit{ViBE} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:vibe_plus_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 22626 & 303600 & \num{7.45} \\		
+			\hline
+			\textbf{LUTRAM} & 2253 & 130800 & \num{1.80}  \\
+			\hline
+			\textbf{FF} & 25004 & 607200 & \num{4.12} \\
+			\hline
+			\textbf{BRAM} & 354 & 1030 & \num{34.37}  \\
+	        \hline		
+			\textbf{DSP} & 49 & 2800 & \num{1.75}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+
+
 \section{Implementacja algorytmu PBAS}
 \label{sec:fpga_pbas}
 
@@ -194,6 +348,72 @@ Implementacja algorytmu \textit{PBAS} przedstawiona na rysunku \ref{fig:pbas_1c_
 
 Pierwsza część modelu składa się z $N$ próbek, każda próbka zawiera wartość piksela -- $B_i$ oraz zapamiętany minimalny dystans -- $D_i$ pomiędzy aktualną próbką a aktualną wartością piksela. Na końcu znajdują się parametry $R$ i $T$. Modele dla poszczególnych składowych \textit{RGB} ustawione kolejno po sobie. Dla rozdzielczości \textit{576p} przyjęto model składający się z $N=19$ próbek. Parametry $R$ i $T$ zapisano w postaci 16-bitowych liczb stałoprzecinkowych w formacie \textit{8z8u}. Minimalny dystans, podobnie jak próbka, zapisana jest jako 8-bitowa liczba całkowita. Sumarycznie model tła dla jednej składowej \textit{RGB} ma rozmiar $19 \cdot (8+8) + 16 + 16 = 336$ bitów, zatem cały model zajmuje $3 \cdot 336 = 1008$ bitów. Dla wyższych rozdzielczości wykorzystano algorytm operujący na obrazie w skali szarości, model w tym przypadku składa się z $N=14$ próbek. Zatem, cały model, można zapisać za pomocą $14 \cdot (8+8) + 16 + 16 = 256$, jest to maksymalna szerokość modelu, która może zostać wykorzystana w przypadku obrazu w rozdzielczości \textit{720p} lub \textit{1080p}. 
 
+
+Zużycie zasobów dla algorytmu \textit{PBAS} w wersji \textit{576p@50fps} i \textit{1080p@50fps} zamieszczono w tabelach \ref{tab:pbas_utilization} i \ref{tab:pbas_hd_utilization}, pobór mocy w obu przypadkach wynosi odpowiednio \num{4.686}W i \num{3.263}W. Należy jeszcze raz podkreślić, że dla wyższej rozdzielczości zastosowano algorytm operujący na obrazie w skali szarości z dużo mniej dokładnym modelem tła. Takie działanie wymuszone było ograniczeniami zewnętrznej pamięci \textit{RAM}. Ostatecznie z tego powodu zużycie zasobów oraz pobór mocy dla rozdzielczości \textit{1080p} jest zdecydowanie niższy niż dla \textit{576p}. W porównaniu do algorytmu \textit{ViBE} (tabela \ref{tab:vibe_utilization}) możemy zauważyć znaczący wzrost wykorzystywanych zasobów. Taki rezultat jest zgodny z oczekiwaniami, gdyż jak zostało już wcześniej powiedziane, omawiany algorytm jest rozszerzeniem metody \textit{ViBE}.
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{\textit{PBAS 576p@50fps} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:pbas_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 28142 & 303600 & \num{9.27} \\		
+			\hline
+			\textbf{LUTRAM} & 3492 & 130800 & \num{2.67}  \\
+			\hline
+			\textbf{FF} & 33849 & 607200 & \num{5.57} \\
+			\hline
+			\textbf{BRAM} & 244 & 1030 & \num{23.69}  \\
+	        \hline		
+			\textbf{DSP} & 24 & 2800 & \num{0.86}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{\textit{PBAS 1080p@50fps} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:pbas_hd_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 16389 & 303600 & \num{5.40} \\		
+			\hline
+			\textbf{LUTRAM} & 2816 & 130800 & \num{2.15}  \\
+			\hline
+			\textbf{FF} & 16494 & 607200 & \num{2.72} \\
+			\hline
+			\textbf{BRAM} & 170 & 1030 & \num{16.50}  \\
+	        \hline		
+			\textbf{DSP} & 11 & 2800 & \num{0.39}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
 
 \section{Implementacja rozszerzonej wersji metody PBAS}
 \label{sec:fpga_pbas_plus}
@@ -231,10 +451,46 @@ Oprócz wymienionych czterech istnieje jeszcze jeden blok, aktualizujący na bie
 		\label{fig:pbas_plus_demo}
 	\end{figure}
 
+
+Wykorzystanie zasobów przez rozszerzoną wersję algorytmu \textit{PBAS} przedstawiono w tabeli \ref{tab:pbas_plus_utilization}, oszacowany pobór mocy wynosi natomiast \num{5.087}W. Ze względu na mechanizm indeksacji, jest to najbardziej złożony ze wszystkich omawianych algorytmów, stąd też najwyższe zużycie zasobów jak i pobór mocy. W stosunku do standardowej metody \textit{PBAS} możemy zauważyć kilku procentowy wzrost dla większości typów. 
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{Rozszerzony algorytm \textit{PBAS} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:pbas_plus_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 40329 & 303600 & \num{13.28} \\		
+			\hline
+			\textbf{LUTRAM} & 5549 & 130800 & \num{4.24}  \\
+			\hline
+			\textbf{FF} & 40849 & 607200 & \num{6.73} \\
+			\hline
+			\textbf{BRAM} & 260 & 1030 & \num{25.19}  \\
+	        \hline		
+			\textbf{DSP} & 24 & 2800 & \num{0.86}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+
+
 \section{Implementacja GMM}
 \label{sec:fpga_gmm}
 
-Przedstawiona tutaj implementacja algorytmu \textit{GMM} została przygotowana w ramach pracy inżynierskiej \cite{piszczek_15}. Sposób implementacji sprzętowej omawianej metody jest tematem niezwykle rozległym, w niniejszym rozdziale przedstawiono jedynie ogólną idee przygotowanej architektury bez zagłębiania się w szczegóły implementacyjne. Schemat przedstawiający implementację i wykorzystane moduły został pokazany na rysunku \ref{fig:gmm_diagram}.
+Przedstawiona tutaj implementacja algorytmu \textit{GMM} została przygotowana w ramach pracy inżynierskiej \cite{piszczek_15}. Sposób implementacji sprzętowej omawianej metody jest tematem niezwykle rozległym, w~niniejszym rozdziale przedstawiono jedynie ogólną idee przygotowanej architektury bez zagłębiania się w szczegóły implementacyjne. Schemat przedstawiający implementację i wykorzystane moduły został pokazany na rysunku \ref{fig:gmm_diagram}.
 
 	\begin{figure}[h!]
 		\centering
@@ -247,35 +503,35 @@ Niewątpliwą zaletą, znacząco ułatwiającą implementację w układzie repro
 
 Po dokonaniu sortowania, poszczególne rozkłady Gaussa są klasyfikowane, na podstawie równania \ref{equ:gmm_b}. Następnie przeprowadzany jest test dopasowania i ostateczna klasyfikacja piksela, zgodnie z~równaniem \ref{equ:gmm_mahalanobis}. Po dokonaniu klasyfikacji rozkłady Gaussa są aktualizowane i zapisywane w pamięci \textit{RAM}.
 
-Przygotowana implementacja przetwarza obraz we wszystkich wymaganych rozdzielczościach, czyli \textit{576p}, \textit{720p} i \textit{1080p} w 50 klatkach na sekundę. Dla obrazu \textit{720x576} przyjęto $K=5$ rozkładów Gaussa w każdym model, natomiast dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, liczba rozkładów wynosi $K=3$. W modelu tła pojedynczy rozkład Gaussa ma rozmiar $68$ bitów, dokładny opis i reprezentacja poszczególnych bitów modelu została przedstawiona w tabeli \ref{tab:gmm_ram_model}.
+Przygotowana implementacja przetwarza obraz we wszystkich wymaganych rozdzielczościach, czyli \textit{576p}, \textit{720p} i \textit{1080p} w 50 klatkach na sekundę. Dla obrazu \textit{720x576} przyjęto $K=5$ rozkładów Gaussa w~każdym modelu, natomiast dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, liczba rozkładów wynosi $K=3$. W modelu tła pojedynczy rozkład Gaussa ma rozmiar $68$ bitów, dokładny opis i reprezentacja poszczególnych bitów modelu została przedstawiona w tabeli \ref{tab:gmm_ram_model}.
 
-\begin{table}[h]
-	\centering
-	\begin{threeparttable}
-		\caption{Znaczenie kolejnych bitów w reprezentacji rozkładu Gaussa -- źródło \cite{piszczek_15}}
-		\label{tab:gmm_ram_model}
-
-		\begin{tabular}{| c | m{12.5cm} |}  
-		\hline
-		\textbf{Zakres bitowy} & \multicolumn{1}{c|}{\textbf{Oznaczenie}} \\
-		\hline
-		\textit{0} & Bit pierwszego planu. Jeśli jest równy 1 oznacza to, że rozkład Gaussa reprezentuje obiekty pierwszoplanowe, w przeciwnym razie reprezentuje on tło. \\
-		\hline
-		\textit{1 -- 7} & Bity zarezerwowane (w razie wprowadzenia nowych flag). \\
-		\hline
-        \textit{8 -- 19} & Waga rozkładu Gaussa $\omega$ jako liczba stałoprzecinkowa (zakres 0 -- 1). Część całkowita zajmuje 0 bitów, część ułamkowa 12 bitów. \\
-	    \hline
-	    \textit{20 -- 31} & Wariancja ($\sigma^2$) jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
-	    \hline
-	    \textit{32 -- 43} & Średnia wartość barwy czerwonej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
-        \hline
-        \textit{44 -- 55} & Średnia wartość barwy zielonej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
-        \hline
-        \textit{56 -- 67} & Średnia wartość barwy niebieskiej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
-        \hline
-		\end{tabular}				
-	\end{threeparttable}
-\end{table}
+	\begin{table}[h]
+		\centering
+		\begin{threeparttable}
+			\caption{Znaczenie kolejnych bitów w reprezentacji rozkładu Gaussa -- źródło \cite{piszczek_15}}
+			\label{tab:gmm_ram_model}
+	
+			\begin{tabular}{| c | m{12.5cm} |}  
+			\hline
+			\textbf{Zakres bitowy} & \multicolumn{1}{c|}{\textbf{Oznaczenie}} \\
+			\hline
+			\textit{0} & Bit pierwszego planu. Jeśli jest równy 1 oznacza to, że rozkład Gaussa reprezentuje obiekty pierwszoplanowe, w przeciwnym razie reprezentuje on tło. \\
+			\hline
+			\textit{1 -- 7} & Bity zarezerwowane (w razie wprowadzenia nowych flag). \\
+			\hline
+	        \textit{8 -- 19} & Waga rozkładu Gaussa $\omega$ jako liczba stałoprzecinkowa (zakres 0 -- 1). Część całkowita zajmuje 0 bitów, część ułamkowa 12 bitów. \\
+		    \hline
+		    \textit{20 -- 31} & Wariancja ($\sigma^2$) jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
+		    \hline
+		    \textit{32 -- 43} & Średnia wartość barwy czerwonej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
+	        \hline
+	        \textit{44 -- 55} & Średnia wartość barwy zielonej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
+	        \hline
+	        \textit{56 -- 67} & Średnia wartość barwy niebieskiej piksela jako liczba stałoprzecinkowa (zakres 0 -- 256). Część całkowita zajmuje 8 bitów, część ułamkowa 4 bity. \\
+	        \hline
+			\end{tabular}				
+		\end{threeparttable}
+	\end{table}
 
 Poglądowy schemat przedstawiający zasadę działania sieci sortującej dla $K=5$ elementów, został pokazany na rysunku \ref{fig:gmm_sort}. Jest to sprzętowa realizacja algorytmu \textit{BS} (ang. \textit{Bubble Sort} -- sortowanie bąbelkowe). Pionowe linie oznaczają, porównania między elementami. Przerywane linie z grotem określają z kolei kierunek przesuwania się najmniejszego elementu w danej iteracji. W pierwszym kroku spośród $K$ elementów, wyłaniany jest najmniejszy poprzez wykonanie $K-1$ porównań. Wyznaczony w ten sposób element jest przestawiany na sam dół sieci. Następnie wśród pozostałych $K-1$ elementów wyszukiwany jest kolejny najmniejszy, w tym przypadku należy wykonać $K-2$ porównania itd. Ostatecznie do otrzymania posortowanego ciągu potrzeba $K-1$ iteracji algorytmu.  
 	
@@ -287,5 +543,39 @@ Poglądowy schemat przedstawiający zasadę działania sieci sortującej dla $K=
 	\end{figure}	
 
 
-\section{Zużycie zasobów}
-\label{sec:fpga_zasoby}
+Tabela \ref{tab:gmm_utilization} przedstawia wykorzystanie zasobów w układzie \textit{FPGA} przez algorytm \textit{GMM}. Zaimplementowana metoda, w odróżnieniu od innych, nie zawiera operacji kontekstowych (poza filtrem medianowym nakładanym na maskę wyjściową), w związku z tym nie jest wykorzystywana pamięć \textit{BRAM}. W przypadku pozostałych zasobów kluczowy jest parametr $K$ reprezentujący liczbę rozkładów Gaussa. Dla $K=5$, czyli domyślnej wartości wykorzystanie zasobów jest zdecydowanie niższe niż w przypadku algorytmów \textit{ViBE} i \textit{PBAS}, co niestety przekłada się również na efekt końcowy. Testy poszczególnych algorytmów zostały szczegółowo przedstawione w rozdziale \ref{cha:ewaluacja}.
+
+	\begin{table}[h!]
+		\centering
+		\begin{threeparttable}
+			\caption{\textit{GMM} - wykorzystanie zasobów (\textit{Virtex 7})}
+			\label{tab:gmm_utilization}
+	
+			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\hline
+			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\hline \hline
+	        \textbf{LUT} & 426 & 303600 & \num{0.14} \\		
+			\hline
+			\textbf{LUTRAM} & 338 & 130800 & \num{0.26}  \\
+			\hline
+			\textbf{FF} & 752 & 607200 & \num{0.12} \\
+			\hline
+			\textbf{BRAM} & 3 & 1030 & \num{0.002}  \\
+	        \hline		
+			\textbf{DSP} & 0 & 2800 & \num{0.0}  \\
+			\hline
+	%		\textbf{IO} & 178 & 700 & \num{25.43}  \\
+	%		\hline
+	%		\textbf{BUFG} & 3 & 32 & \num{9.38}  \\
+	%		\hline
+	%		\textbf{MMCM} & 1 & 14 & \num{7.14}  \\
+	%		\hline
+	%		\textbf{PLL} & 1 & 14 & \num{7.14}  \\
+	%		\hline		
+			\end{tabular}			
+		\end{threeparttable}
+	\end{table}
+
+%\section{Podsumowanie}
+%\label{sec:implementacja_posumowanie}
