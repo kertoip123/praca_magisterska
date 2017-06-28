@@ -1,12 +1,62 @@
-\chapter{Implementacja sprzętowa wybranych algorytmów}
+\chapter{Implementacja sprzętowa wybranych algorytmów segmentacji obiektów pierwszoplanowych}
 \label{cha:implementacja_sprzetowa}
+
+%%TODO dla tzw. kompeltności przydałby się którki 1-3 strony opis układów FPGA - zasobów itp.
+\section{Układy \textit{FPGA} -- wprowadzenie}
+\label{sec:fpga_wprowadzenie}
+
+W przypadku układów \textit{FPGA}, do dobrego projektowania logiki programowej, konieczne jest poznanie podstaw ich budowy. W niniejszym rozdziale zostaną przedstawione podstawowe elementy każdego układu \textit{FPGA}. Szczegółowy opis wykorzystanej platformy (seria \textit{Virtex-7} firmy \textit{Xillinx}) można znaleźć w dokumentacji producenta \cite{xilinx_v7}.
+
+Podstawowym elementem, znajdującym się w każdym układzie \textit{FPGA}, jest blok \textit{CLB} (ang. \textit{Configurable Logic Block} -- konfigurowalny blok logiczny). Schemat jego budowy przedstawiono na rysunku~\ref{fig:fpga_clb}. Składa się on z dwóch elementów \textit{Slice}, które są połączone bezpośrednio z matrycą przełączeń (ang.~\textit{Switch Matrix}). Przy operacjach arytmetycznych wykorzystywana jest szybka logika przeniesienia, na omawianym rysunku są to linie \textit{CIN} i \textit{COUT}.
+ 
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.35]{img/4/clb_block.png}
+        \caption{Schemat bloku \textit{CLB} -- źródło \cite{xilinx_v7}}
+	    \label{fig:fpga_clb}
+    \end{figure}
+
+W wykorzystanym układzie z rodziny \textit{Virtex 7} występują dwa typy bloków \textit{Slice}: \textit{SLICEL} oraz \textit{SLICEM}. Standardowy \textit{SLICEL} składa się z następujących elementów:
+    \begin{itemize}[itemsep=-1ex]
+    \item Cztery generatory funkcyjne, zrealizowane jako \textit{LUT} (ang. \textit{Look-up Table})
+    \item Przerzutników typu \textit{D} (8 sztuk)
+    \item multipleksery wykorzystywane do łączenia elementów \textit{LUT}
+    \item szybka logika przeniesienia wykorzystywana w operacjach arytmetycznych
+    \end{itemize}   
+
+Dodatkowo, bardziej rozbudowany typ \textit{SLICEM} posiada jeszcze dwie dodatkowe funkcje. Pierwszą z~nich jest możliwość przechowywania danych w rozproszonej pamięci \textit{RAM} (ang. \textit{Distributed RAM}). Istnieje możliwość konfiguracji zarówno rozmiaru jak i liczby portów, dostępne warianty to: $256x1$~jednoportowa, $128x1$ dwuportowa i $64x1$ czteroportowa. Drugą dodatkową funkcją jest 32-bitowy rejestr przesuwny, który może zostać wykorzystany do tworzenia linii opóźniających.
+
+Wspomniane bloki \textit{LUT} posiadają 6 wejść i 2 niezależne wyjścia. Można zatem skonfigurować jako 6-wejściową funkcję logiczną, dwie 5-wejściowe funkcje (posiadające wspólne wejście) lub dwie funkcje z 3 i 2 wejściami. Dodatkowo dzięki zastosowaniu multiplekserów, obecnych w każdym bloku \textit{Slice}, istnieje możliwość implementacji funkcji 7 i 8-wejściowych poprzez połączenie bloków \textit{LUT}.
+
+Oprócz wymienionych wyżej, każdy układ \textit{FPGA} posiada również wiele innych zasobów, do najważniejszych z pewnością należy zaliczyć (szczegółowy opis można znaleźć w dokumentacji technicznej producenta \cite{xilinx_7series_overview}):
+    \begin{itemize}[label=$\bullet$]
+    \item \textit{CMT} (ang. \textit{Clock Managment Tiles}) -- blok służący do generacji różnych częstotliwości zegara oraz jego równomiernego rozpropagowania i tłumienia zakłóceń fazy.
+    \item \textit{Block RAM (BRAM)} -- dwuportowa pamięć \textit{RAM} o rozmiarze 36Kb, istnieje możliwość skonfigurowania jej jako kolejki \textit{FIFO} (ang. \textit{First In First Out} -- pierwszy na wejściu, pierwszy na wyjściu). 
+    \item \textit{DSP Slice} (ang. \textit{Digital Signal Processing}) -- moduły z mnożarką $25x18$ oraz 48-bitowym akumulatorem.
+    \item \textit{Select I/O} -- zasoby wejścia/wyjścia, wspierające wiele standardów, między innymi: \textit{LVCMOS},
+\textit{LVTTL}, \textit{HSTL}, \textit{PCI}, \textit{SSTL}, \textit{LVDS}.
+    \item \textit{Low-Power Gigabit Transceivers} -- moduły umożliwiające szybką transmisję szeregową, maksymalne prędkości przesyłu danych zależą od typu transceivera i wynoszą odpowiednio: \num{6.6} Gb/s (\textit{GTP}), \num{12.5} Gb/s~(\textit{GTX}), \num{13.1} Gb/s (\textit{GTH}) lub \num{28.05} Gb/s (\textit{GTZ}).
+    \item \textit{Moduł PCI Express} -- wspiera transmisję w standardzie \textit{PCI Express 3.0} z przepustowością do \num{8}~Gb/s.
+    \item Sterowniki zewnętrznej pamięci \textit{RAM} -- wsparcie dla pamięci \textit{DDR3}, obsługa transmisji do \num{1866}~Mb/s.
+    \end{itemize}
+
 
 \section{Modele programowe}
 \label{sec:modele_programowe}
 
-Przed przystąpieniem do implementacji sprzętowej, dla każdego algorytmu przygotowano także model programowy. Zostały one zaimplementowane w języku \textit{C++} z wykorzystaniem biblioteki \textit{OpenCV} \cite{opencv_17}. Całość przygotowano w środowisku programistycznym \textit{Microsoft Visual Studio 2015}. Głównym celem stworzonych implementacji jest przeprowadzenie szczegółowych testów poszczególnych algorytmów. Tematyka ta została szczerzej opisana w rozdziale \ref{cha:ewaluacja}, natomiast design poszczególnych algorytmów zaprezentowano w dodatku \ref{appx:opis_informatyczny}.
+Przed przystąpieniem do implementacji sprzętowej, dla każdego algorytmu przygotowano model programowy. 
+Został one zaimplementowany w języku \textit{C++} z wykorzystaniem liczb zmiennoprzecinkowych oraz biblioteki \textit{OpenCV} \cite{opencv_17}. 
+Całość przygotowano w środowisku programistycznym \textit{Microsoft Visual Studio 2015}. 
+Głównym celem stworzonych implementacji było przeprowadzenie szczegółowych testów poszczególnych algorytmów. 
+Tematyka ta została szczerzej opisana w rozdziale \ref{cha:ewaluacja}, natomiast architekturę oraz hierarchię zaimplementowanych funkcji i klas realizujących poszczególne algorytmy zaprezentowano w dodatku \ref{appx:opis_informatyczny}. W niniejszej pracy wykorzystano częściowo kod źródłowy udostępniony przez autorów artykułów z których pochodzą omawiane metody. Poszczególne implementacje zostały, na potrzeby pracy, zmodyfikowane i zintegrowane w jeden projekt, aby było możliwe ich kompleksowe przetestowanie.
+%%TODO desing to nie polskie słowo !
 
-Na rysunku \ref{fig:pbas_cpp} przedstawiono zrzut ekranu prezentujący działanie modelu programowego metody \textit{PBAS}. Aplikacja wyświetla cztery okna, na których przedstawione są kolejno: obraz wejściowy w przestrzeni RGB, wzorcowa maska wyjściowa (ang. \textit{ground truth}), efekt końcowy algorytmu \textit{PBAS}, wizualizacja rozszerzonej wersji tej metody. Rysunek \ref{fig:vibe_cpp} przedstawia z kolei działający algorytm \textit{ViBE}. Podobnie jak w poprzednim przypadku wyświetlane są cztery okna: wyjście, wzorzec, maska wyjściowa oraz wizualizacja przepływu optycznego.
+%%TODO Tu proszę napisać jak było tzn. że chyba w oparciu o istniejące modele powstałe w Lab Bio i z jaką PAna ingerencją.
+
+Na rysunku \ref{fig:pbas_cpp} przedstawiono zrzut ekranu prezentujący działanie modelu programowego metody \textit{PBAS}. 
+Aplikacja wyświetla cztery okna, na których przedstawione są kolejno: obraz wejściowy w przestrzeni RGB, wzorcowa maska wyjściowa (ang. \textit{ground truth}), efekt końcowy algorytmu \textit{PBAS}, wizualizacja rozszerzonej wersji tej metody. 
+Rysunek \ref{fig:vibe_cpp} przedstawia z kolei działający algorytm \textit{ViBE}. 
+Podobnie jak w poprzednim przypadku wyświetlane są cztery okna: wyjście, wzorzec, maska wyjściowa oraz wizualizacja przepływu optycznego.
 
     \begin{figure}[h!]
         \centering
@@ -15,7 +65,9 @@ Na rysunku \ref{fig:pbas_cpp} przedstawiono zrzut ekranu prezentujący działani
 	    \label{fig:pbas_cpp}
     \end{figure}
 
-Wykonane implementacje oczywiście nie są w stanie zapewnić przetwarzania obrazu w czasie rzeczywistym. Rozdzielczość obrazu w wykorzystanych sekwencjach testowych zawiera się w przedziale od \textit{320x240} do \textit{720x576} pikseli. Nawet w przypadku tak niedużego obrazu otrzymana prędkość przetwarzania, w zależności od algorytmu, wahała się od kilku do co najwyżej kilkunastu klatek na sekundę. 
+Wykonane implementacje oczywiście nie są w stanie zapewnić przetwarzania obrazu w czasie rzeczywistym. %%TODO podać platformę obliczeniową !
+Rozdzielczość obrazu w wykorzystanych sekwencjach testowych zawiera się w przedziale od \textit{320x240} do \textit{720x576} pikseli. 
+Nawet w przypadku tak niedużego obrazu otrzymana prędkość przetwarzania, w zależności od algorytmu, wahała się od kilku do co najwyżej kilkunastu klatek na sekundę. Wszystkie testy przeprowadzono na komputerze wyposażonym w procesor \textit{Intel Core i7 3630QM@3,4GHz}. 
 
     \begin{figure}[h!]
         \centering
@@ -23,19 +75,34 @@ Wykonane implementacje oczywiście nie są w stanie zapewnić przetwarzania obra
         \caption{Model programowy metody \textit{ViBE}}
 	    \label{fig:vibe_cpp}
     \end{figure}
-
+    
+    %%TODO a nic nie napisał Pan to stałym/zmiennym przecinku oraz o referencji dla modułów sprzętowych
 
 \section{Wykorzystany układ oraz interfejs wizyjny}
 \label{sec:uklad_interfejs}
 
-Do implementacji algorytmów wykorzystano środowisko \textit{Vivado}. Użyto najnowszej wersji, na moment tworzenia niniejszej pracy (czerwiec 2017), oznaczonej numerem \textit{2017.1}. Większość modułów zaimplementowano w języku \textit{Verilog}. W pojedynczych przypadkach wykorzystano również język \textit{VHDL}. Wszystkie metody uruchomiono i sprawdzono na płytce \textit{VC707} z układem \textit{Virtex-7 (\small{XC7VX485T--2FFG1761})}. Jest to jeden z najwydajniejszych układów firmy \textit{Xillinx}. Dodatkowo w celu podłączenia kamery i transmisji obrazu wykorzystano kartę \textit{Avnet DVI I/O FMC}. Przyjęto założenie, że zaimplementowane algorytmy mają pracować w rozdzielczość \textit{720x576} w 50 klatkach na sekundę. Opcjonalnie obsługiwana może być również rozdzielczość \textit{1280x720} i \textit{1920x1080}, również z prędkością \textit{50 fps} (ang. \textit{Frames Per Second} -- klatki na sekundę). Ograniczeniem w przypadku wyższych rozdzielczości są głównie wielkości pamięci \textit{RAM}, którą można przeznaczyć na model tła, oraz wymagana częstotliwość zegara. Dla obrazu \textit{576p@50fps} wymagana jest praca układu z częstotliwością \num{27}MHz,. W przypadku rozdzielczości \textit{720p@50fps} oraz \textit{1080p@50fps} minimalna częstotliwość zegara musi wynosić już odpowiednio \num{74.25}MHz i \num{148.5}MHz.
+Do implementacji algorytmów wykorzystano środowisko \textit{Vivado}. 
+Użyto najnowszej wersji, na moment tworzenia niniejszej pracy (czerwiec 2017), oznaczonej numerem \textit{2017.1}. Weryfikację modelu programowego z implementacją sprzętową, przeprowadzono z wykorzystaniem, dostępnego w \textit{Vivado}, środowiska symulacyjnego.
+Większość modułów zaimplementowano w języku \textit{Verilog}. 
+W pojedynczych przypadkach wykorzystano również język \textit{VHDL}. 
+Wszystkie metody uruchomiono i sprawdzono na karcie \textit{VC707} z układem \textit{Virtex-7 (\small{XC7VX485T--2FFG1761})}. Platformy z rodziny \textit{Virtex-7} należą do najwydajniejszych układów firmy \textit{Xilinx}. %%TODO złe słowo, proszę sprawdzić jak 485 T ma się do rodziny V7 oraz w którym roku zostały wprowadzone.
+Dodatkowo w celu podłączenia kamery i transmisji obrazu wykorzystano kartę \textit{Avnet DVI I/O FMC}. 
+Przyjęto założenie, że zaimplementowane algorytmy mają pracować w rozdzielczość \textit{720x576} w 50 klatkach na sekundę. Opcjonalnie obsługiwana może być również rozdzielczość \textit{1280x720} i~\textit{1920x1080}, również z prędkością \textit{50 fps} (ang. \textit{Frames Per Second} -- klatki na sekundę). Ograniczeniem w przypadku wyższych rozdzielczości są głównie przepustowość pamięci \textit{RAM} oraz wymagana częstotliwość zegara. Dla obrazu \textit{576p@50fps} wymagana jest praca układu z częstotliwością \num{27}MHz. W przypadku rozdzielczości \textit{720p@50fps} oraz \textit{1080p@50fps} minimalna częstotliwość zegara musi wynosić już odpowiednio \num{74.25}MHz i \num{148.5}MHz. Ograniczona przepustowość pamięci \textit{RAM} przekłada się natomiast bezpośrednio na maksymalny rozmiar modelu tła dla pojedynczego piksela.
+%%TODO chybna nie wielkość tylko przepustowość do pamięci RAM 
 
-W przypadku implementacji sprzętowej w układzie \textit{FPGA} został wykorzystany uniwersalny interfejs wizyjny. Jego układ, przedstawiający podstawowe sygnały wejściowe i wyjściowe, został pokazany na rys. \ref{fig:fpga_vision_if}. Oprócz sygnałów wejściowych/wyjściowych z kamery, konieczne jest także zapewnienie niezależnego obszar pamięci \textit{RAM} dla każdego piksela. Maksymalnie do wykorzystania są 1024 bity na piksel w przypadku obrazu o rozdzielczości \textit{720x576} oraz 256 bitów dla wyższych rozdzielczości (\textit{720}p i \textit{1080}p). Sygnały pochodzące z kamery zostały szerzej opisane w rozdziale \ref{subsec:fpga_kontekst}. Należy zwrócić uwagę, że przedstawiony tutaj interfejs, zawiera jedynie niezbędne sygnały do funkcjonowania systemu. W przypadku niektórych algorytmów został on rozszerzony o dodatkowe wejścia/wyjścia. 
+W przypadku implementacji sprzętowej w układzie \textit{FPGA} został wykorzystany uniwersalny interfejs wizyjny. 
+Jego układ, przedstawiający podstawowe sygnały wejściowe i wyjściowe, został pokazany na rys. \ref{fig:fpga_vision_if}. Przedstawiony interfejs został wykorzystany jako szablon modułu segmentacji obiektów pierwszoplanowych, występuje we wszystkich zaimplementowanych algorytmach. 
+%%TODO doprecyzowałbym to. Że to jest taki szablon modułu segmentacji obiektów pierwszoplanowych...
+Oprócz sygnałów wejściowych/wyjściowych z kamery, konieczne jest także zapewnienie niezależnego obszar pamięci \textit{RAM} dla każdego piksela.
+Maksymalnie do wykorzystania są 1024 bity na piksel w przypadku obrazu o rozdzielczości \textit{720x576} oraz 256 bitów dla wyższych rozdzielczości (\textit{720}p i \textit{1080}p). 
+Sygnały pochodzące z kamery zostały szerzej opisane w rozdziale \ref{subsec:fpga_kontekst}. 
+Należy zwrócić uwagę, że przedstawiony tutaj interfejs, zawiera jedynie niezbędne sygnały do funkcjonowania systemu. 
+W przypadku niektórych algorytmów został on rozszerzony o dodatkowe wejścia/wyjścia. 
 
 	\begin{figure}[h!]
 			\centering
 			\includegraphics[scale=0.75]{img/4/vision_if.png}
-			\caption{Główny interfejs wizyjny}
+			\caption{Szablon interfejsu wizyjnego} %%TODO zmiana podpisu
 			\label{fig:fpga_vision_if}
 	\end{figure}
 
@@ -54,29 +121,34 @@ Natomiast sygnałami wyjściowymi są:\\
 \-\hspace{1cm} \textit{hs\_out} -- opóźniona flaga synchronizacji poziomej\\
 \-\hspace{1cm} \textit{vs\_out} -- opóźniona flaga synchronizacji pionowej\\
 \-\hspace{1cm} \textit{ram\_read} -- sygnał odczytu pamięci RAM\\
-\-\hspace{1cm} \textit{ram\_write} -- sygnał zapisu do pamięci RAM\\
+\-\hspace{1cm} \textit{ram\_write} -- sygnał zapisu do pamięci RAM
 
-Istotną kwestią jest również zużycie zasobów oraz pobór energii przez układ \textit{FPGA}. Jak łatwo zauważyć, sam interfejs wizyjny w połączeniu z kontrolerem pamięci \textit{RAM} jest zagadnieniem dość rozbudowanym. Tabela \ref{tab:sub_utilization} przedstawia zestawienie wykorzystanej logiki programowej w przypadku prostego algorytm odejmowania ramek. Oszacowany pobór mocy wynosi natomiast \num{2.804}W. Odejmowanie ramek jest najprostszą metodą zaimplementowaną w niniejszej pracy, jej szczegółowy opis zamieszczono w rozdziale \ref{sec:proste_metody}. Zaprezentowane tutaj zestawienie będzie stanowić punkt odniesienie dla bardziej zaawansowanych implementacji.  
+Istotną kwestią jest również użycie zasobów oraz pobór energii przez układ \textit{FPGA}. %%TODO użycie, bo jakby się zastanowić to zasoby FPGA się nie żużywają...
+Jak łatwo zauważyć, sam interfejs wizyjny w połączeniu z kontrolerem pamięci \textit{RAM} jest zagadnieniem dość rozbudowanym. W tabeli \ref{tab:hdmi_utilization} zamieszczono wykorzystanie zasobów przez sam tor wizyjny (przepisanie sygnału wejściowego na wyjście), kontroler do zewnętrznej pamięci \textit{RAM} oraz prosty algorytm odejmowania ramek.  Oszacowany pobór mocy takiej implementacji wynosi \num{2.804}W. 
+Odejmowanie ramek jest najprostszą metodą zamieszczoną w niniejszej pracy, jej szczegółowy opis znajduje się w rozdziale \ref{sec:proste_metody}. Zaprezentowane tutaj zestawienie będzie stanowić punkt odniesienie dla bardziej zaawansowanych implementacji.  
 
 	\begin{table}[h!]
 		\centering
 		\begin{threeparttable}
-			\caption{Odejmowanie ramek - wykorzystanie zasobów (\textit{Virtex 7})}
-			\label{tab:sub_utilization}
+			\caption{Wykorzystanie zasobów przez podstawowe moduły (\textit{Virtex 7})}
+			\label{tab:hdmi_utilization}
 	
-			\begin{tabular}{| p{3.5cm} || R{3.5cm} | R{3.5cm} | R{3.5cm} |}  
+			\begin{tabular}{| p{2cm} || R{1.5cm} | R{1.5cm} | R{1.5cm} | R{1.5cm} | R{2.5cm} | R{2cm} |}  
 			\hline
-			\textbf{Zasoby} & \multicolumn{1}{l|}{\textbf{Wykorzystane}} & \multicolumn{1}{l|}{\textbf{Dostępne}} & \multicolumn{1}{l|}		{\textbf{Użycie w \%}} \\
+			\multirow{2}{*}{\textbf{Zasoby}} & \multicolumn{4}{c|}{\textbf{Wykorzystane}} & 
+			\multirow{2}{2cm}{\centering \textbf{Dostępne}} & \multirow{2}{2cm}{\centering \textbf{Użycie w \%}} \\
+			\cline{2-5} & \centering \textit{HDMI} & \centering \textit{RAM} & \centering \textit{FD} & 
+			\centering \textbf{razem} & &\\ 
 			\hline \hline
-	        \textbf{LUT} & 9514 & 303600 & \num{3.13} \\		
+	        \textbf{LUT} & 9514 & 9514 & 9514 & \textbf{9514} & 303600 & \num{3.13} \\		
 			\hline
-			\textbf{LUTRAM} & 1418 & 130800 & \num{1.08}  \\
+			\textbf{LUTRAM} & 1418 & 1418 & 1418 & \textbf{1418} & 130800 & \num{1.08}  \\
 			\hline
-			\textbf{FF} & 9063 & 607200 & \num{1.49} \\
+			\textbf{FF} & 9063 & 9063 & 9063 & \textbf{9063} & 607200 & \num{1.49} \\
 			\hline
-			\textbf{BRAM} & 71 & 1030 & \num{6.89}  \\
+			\textbf{BRAM} & 71 & 71 & 71 & \textbf{71} & 1030 & \num{6.89}  \\
 	        \hline		
-			\textbf{DSP} & 0 & 2800 & \num{0.0}  \\
+			\textbf{DSP} & 0 & 0 & 0 & \textbf{0} & 2800 & \num{0.0}  \\
 			\hline
 	%		\textbf{IO} & 176 & 700 & \num{25.15}  \\
 	%		\hline
@@ -90,22 +162,44 @@ Istotną kwestią jest również zużycie zasobów oraz pobór energii przez uk�
 		\end{threeparttable}
 	\end{table}
 
+%%TODO tutaj bym jednak prosił o bardziej precyzyjne dane pt. 
+%%TODO zasoby "gołego" toru wizyjnego
+%%TODO zasoby kontrolera RAM
+%%TODO zasoby tego modułu segmentracji
+%%TODO suma, żeby się zgadzała z tym w tabeli 4.1
+
+%%TODO poza tym, to jakoś trzeba uporządkować, bo teraz to jest taka wrzutka z tym modułem. MOże właśnie rozbić to na opis toru wizyjengo (może screen z Vivado), potem konteolera RAM, potem tej prostej segmentacji. BTW. nie ma różnicy w zasobach zależnie od rodzielczości obrazu dla kontrolera ?
+
 \section{Trudności występujące w potokowym systemie wizyjnym}
 \label{sec:fpga_wprowadzenie}
 
 \subsection{Kontekst poziomy i pionowy}
 \label{subsec:fpga_kontekst}
 
-Algorytmy wizyjne w układach FPGA, jak już zostało wspomniane, są realizowane w systemie potokowym. Oznacza to, że ramka obrazu przetwarzana jest piksel po pikselu. W związku z tym, w celu wykonania operacji kontekstowej koniecznej jest zastosowanie odpowiednich opóźnień. Dla kontekstu poziomego nie jest to duży problem i może zostać rozwiązany z wykorzystaniem zwykłych rejestrów. Natomiast w przypadku kontekstu pionowego konieczne jest zastosowanie opóźnienia o całą linie obrazu. Do tego celu, wykorzystuje się dostępną w układach FPGA pamięć blokową (\textit{BRAM}). Przykładowy system linii opóźniających, służących do wyznaczenia kontekstu o rozmiarze \textit{5x5} został przedstawiony na rysunku \ref{fig:fpga_delay_line}. Poprzez pojedynczy blok \textbf{D} rozumiemy opóźnienie o jeden takt zegara, z kolei stała \textit{H\_SIZE} definiuje ilość pikseli w jednej linii obrazu.
+Wszystkie zrealizowane w niniejszej pracy algorytmy są realizowane w systemie potokowym. 
+%%TODO raczej mogą być - powinien to Pan rozwinąć.
+Oznacza to, że ramka obrazu przetwarzana jest piksel po pikselu. 
+W związku z tym, w celu wykonania operacji kontekstowej konieczne jest zastosowanie odpowiednich opóźnień. 
+Dla kontekstu poziomego nie jest to duży problem i może zostać rozwiązany z wykorzystaniem zwykłych rejestrów. 
+Natomiast w przypadku kontekstu pionowego konieczne jest zastosowanie opóźnienia o całą linie obrazu. 
+Do tego celu zwykle wykorzystuje się dostępną w układach FPGA pamięć blokową (\textit{BRAM}). 
+Przykładowy system linii opóźniających, służących do wyznaczenia kontekstu o rozmiarze \textit{5x5} został przedstawiony na rysunku \ref{fig:fpga_delay_line}. 
+Poprzez pojedynczy blok \textbf{D} rozumiemy opóźnienie o jeden takt zegara, z kolei stała \textit{H\_SIZE} definiuje liczbę pikseli w jednej linii obrazu.
 
 	\begin{figure}[h!]
 	    \centering
 		\includegraphics[scale=0.2]{img/4/context.png}
-		\caption{Schemat długiej linii opóźniającej - źródło \cite{komorkiewicz_14}}
+		\caption{Schemat długiej linii opóźniającej -- źródło \cite{komorkiewicz_14}}
 		\label{fig:fpga_delay_line}
 	\end{figure}
 	
-Podczas ustalania parametru \textit{H\_SIZE} należy zwrócić uwagę na tzw. obszar synchronizacji. W rzeczywistość ilość pikseli przesyłanych w jednej ramce obrazu jest większa niż sugerowałaby rozdzielczość obrazu. Przykładowo, dla obrazu o rozdzielczości \textit{640x480} pikseli, rzeczywista liczba pikseli, po uwzględnieniu obszaru synchronizacji wynosi \textit{800x600}. Zostało to przedstawione na rysunku \ref{fig:fpga_sync_signals}. Wielkość obszaru synchronizacji zależy zarówno od rozdzielczości obrazu jak i liczby klatek na sekundę. Przy wyznaczaniu odpowiedniej długości, wymaganej linii opóźniającej, pomocna może okazać się baza danych \textit{Modeline Database} \cite{modeline_db_web}. W niniejszej pracy wykorzystano trzy rozdzielczości: \textit{720x576}, \textit{1280x720}, \textit{1920x1080} przy prędkości \textit{50 fps}. Całkowita długość linii poziomych, dla takich konfiguracji, wynosi odpowiednio: \textit{864}, \textit{1680}, \textit{2640}.
+Podczas ustalania parametru \textit{H\_SIZE} należy zwrócić uwagę na tzw. obszar synchronizacji. 
+W rzeczywistości liczba pikseli przesyłanych w~jednej ramce obrazu jest większa niż sugerowałaby rozdzielczość obrazu. 
+Przykładowo, dla obrazu o rozdzielczości \textit{640x480} pikseli, rzeczywista liczba pikseli, po uwzględnieniu obszaru synchronizacji wynosi \textit{800x600}. 
+Zostało to przedstawione na rysunku \ref{fig:fpga_sync_signals}. 
+Wielkość obszaru synchronizacji zależy zarówno od rozdzielczości obrazu jak i liczby klatek na sekundę. 
+Przy wyznaczaniu odpowiedniej długości wymaganej linii opóźniającej pomocna może okazać się baza danych \textit{Modeline Database} \cite{modeline_db_web}. 
+W niniejszej pracy wykorzystano trzy rozdzielczości: \textit{720x576}, \textit{1280x720}, \textit{1920x1080} przy prędkości \textit{50 fps}. Całkowita długość linii poziomych, dla takich konfiguracji, wynosi odpowiednio: \textit{864}, \textit{1680}, \textit{2640}.
 
 	\begin{figure}[h!]
         \centering
@@ -118,9 +212,16 @@ Podczas ustalania parametru \textit{H\_SIZE} należy zwrócić uwagę na tzw. ob
 \subsection{Generowanie liczb losowych}
 \label{subsec:fpga_generator}
 
-Moduł odpowiedzialny za generację liczb pseudolosowych został opracowany na podstawie publikacji \cite{thomas_10}. Wykorzystano go także w wielu innych badań przeprowadzanych w Laboratorium Biocybernetyki AGH, między innymi \cite{kryjak_14_vibe, kryjak_14_pbas}. W przeciwieństwie do pozostałych modułów i algorytmów, generator został w całości zaimplementowany w języku \textit{VHDL}.
+Moduł odpowiedzialny za generację liczb pseudolosowych został opracowany na podstawie publikacji \cite{thomas_10}. 
+Wykorzystano go także w wielu innych badaniach przeprowadzanych w Laboratorium Biocybernetyki AGH, między innymi \cite{kryjak_14_vibe, kryjak_14_pbas}. W przeciwieństwie do pozostałych modułów i algorytmów, generator został w całości zaimplementowany w języku \textit{VHDL}. Wykorzystany kod źródłowy został udostępniony przez autorów wymienionych publikacji.
+%%TODO napisać, że jest to kod udostępniony przez autorów
 
-Zagadnienie liczb pseudolosowych w układach reprogramowalnych jest tematem bardzo rozległym i został dokładnie opisane w przytoczonym artykule. W niniejszym rozdziale zostanie przedstawiona jedynie skrótowa idea działania wykorzystanego generatora. Cała koncepcja opiera się na wykorzystaniu rejestrów przesuwnych (ang. \textit{shift register}) i modułów \textit{LUT} (ang. \textit{Look-Up Table}). Uproszczony schemat, tego typu generatora, zamieszczono na rysunku \ref{fig:fpga_rng}. Wartości wyjściowe są zapisywane w rejestrach przesuwnych o różnych długościach. Następnie różne kombinacje zapamiętanych bitów są podawane na wejścia bramek \textit{XOR}, które generują pseudolosowy sygnał wyjściowy.
+Zagadnienie generacji liczb pseudolosowych w układach reprogramowalnych jest tematem bardzo rozległym i zostało dokładnie opisane w przytoczonym artykule. 
+W niniejszym rozdziale zostanie przedstawiona jedynie skrótowa idea działania użytego generatora. 
+Cała koncepcja opiera się na wykorzystaniu rejestrów przesuwnych (ang. \textit{shift register}) i modułów \textit{LUT}. %%TODO powt. wykorzystaniu
+Uproszczony schemat tego typu generatora zamieszczono na rysunku \ref{fig:fpga_rng}. 
+Wartości wyjściowe są zapisywane w rejestrach przesuwnych o różnych długościach. 
+Następnie różne kombinacje zapamiętanych bitów są podawane na wejścia bramek \textit{XOR}, które generują pseudolosowy sygnał wyjściowy.
 
 	\begin{figure}[h!]
         \centering
@@ -135,12 +236,20 @@ Architekturę generatora można opisać za pomocą zestawu 4 parametrów ($n$, $
 \-\hspace{1cm} \textit{t} -- liczba wejść każdej bramki \textit{XOR}\\
 \-\hspace{1cm} \textit{k} -- maksymalna długość rejestru przesuwnego\\
 
-Wykorzystany w niniejszej pracy generator posiada następujące parametry: $n=3900$, $r=128$, $t=5$, $k=32$. Istnieje jeszcze jeden dodatkowy parametr $s$, który określa sposób połączeń wyjść rejestrów przesuwnych z bramkami \textit{XOR}. Dokładny algorytm, opisujący sposób doboru optymalnych połączeń, jest bardzo zaawansowanym zagadnieniem, wybiegającym poza tematykę niniejszej pracy. Szczegółowy opis i analiza tego podejścia została przedstawiona w przytoczonej publikacji.
+Wykorzystany w niniejszej pracy generator posiada następujące parametry: $n=3900$, $r=128$, $t=5$, $k=32$. 
+Istnieje jeszcze jeden dodatkowy parametr $s$, który określa sposób połączeń wyjść rejestrów przesuwnych z bramkami \textit{XOR}. 
+Dokładny algorytm, opisujący sposób doboru optymalnych połączeń, jest bardzo zaawansowanym zagadnieniem, wybiegającym poza tematykę niniejszej pracy. 
+Szczegółowy opis i analiza tego podejścia została przedstawiona w przytoczonej publikacji.
 
 \subsection{Kontroler pamięci RAM}
 \label{subsec:fpga_ram_kontroler}
 
-Kontroler pamięci \textit{RAM DDR3}, jest niezbędnym elementem, koniecznym do prawidłowego działa każdego rozbudowanego systemu wizyjnego. Zewnętrzna pamięć, jest bowiem niezbędna do przechowywania modelu tła dla poszczególnych pikseli. Przedstawiony kontroler, został opracowany w Laboratorium Biocybernetyki AGH w ramach publikacji \cite{kryjak_14_hd_fpga}. Podobnie jak w przypadku generatora liczb pseudolosowych, rozdział ten ma na celu jedynie przedstawienie uproszczonej koncepcji działania modułu. Dokładny opis i dyskusja zostały zawarte w przytoczonej publikacji. \textit{Xillinx} zapewnia dedykowany moduł \textit{MIG} (\textit{Memory Interface Generator}) do komunikacji z zewnętrzną pamięcią \textit{RAM}. Schemat kontrolera pamięci, wykorzystującego \textit{MIG} został przedstawiony na rysunku \ref{fig:ram_ctrl}. 
+Kontroler pamięci \textit{RAM DDR3} jest niezbędnym elementem, koniecznym do prawidłowego działa każdego rozbudowanego systemu wizyjnego. Zewnętrzna pamięć, jest bowiem konieczna do przechowywania modelu tła dla poszczególnych pikseli. Układy \textit{FPGA} posiadają oczywiście również bloki \textit{BRAM}, jednak dostępna w nich pamięć jest zbyt mała, aby przechować choć jedną ramkę obrazu. %%TODO powt. niezbędna. Tu można szerzej to poruszyć pt, że obraz nie mieści się w BRAM i trzeba czasem zapiaś (nie tylko w kontekście SOP)
+Przedstawiony kontroler, został opracowany w Laboratorium Biocybernetyki AGH w ramach publikacji \cite{kryjak_14_hd_fpga}, autorzy udostępnili, na potrzeby niniejszej pracy, kod źródłowy w języku \textit{Verilog}.
+Podobnie jak w przypadku generatora liczb pseudolosowych, rozdział ten ma na celu jedynie przedstawienie uproszczonej koncepcji działania modułu.
+Dokładny opis i dyskusja zostały zawarte w przytoczonej publikacji. 
+Firma \textit{Xilinx} zapewnia dedykowany moduł \textit{MIG} (\textit{Memory Interface Generator}) do komunikacji z zewnętrzną pamięcią DDR3 \textit{RAM}. 
+Schemat kontrolera pamięci wykorzystującego \textit{MIG} został przedstawiony na rysunku \ref{fig:ram_ctrl}. 
 
 	\begin{figure}[h!]
 		\centering
@@ -149,12 +258,28 @@ Kontroler pamięci \textit{RAM DDR3}, jest niezbędnym elementem, koniecznym do 
 		\label{fig:ram_ctrl}
 	\end{figure}
 
-Ze względu na fakt, że pamięć \textit{RAM} synchronizowana jest innym zegarem niż sygnał z kamery konieczne jest zastosowanie buforów w postaci dodatkowych kolejek \textit{FIFO}. Omawiany kontroler został zaimplementowany jako maszyna stanów. Podczas etapu inicjalizacji zapełniona zostaje w całości kolejka \textit{READ FIFO}. Następnie, w momencie gdy pojawi się na wejściu nowa ramka obrazu, modele tła z kolejki \textit{READ FIFO} zostają odczytywane i przekazywane do modułu realizującego algorytm segmentacji tła. Zaktualizowany model tła otrzymany na wyjściu, jest umieszczany w kolejce \textit{WRITE FIFO}. Kolejnym krokiem jest przeniesienie danych z kolejki \textit{WRITE FIFO} do dużo krótszej \textit{TEMP FIFO}. W~momencie, gdy kolejka ta jest zapełniona, uruchamiany jest tryb \textit{burst}, zapisujący wszystkie modele do pamięci \textit{RAM}. Po dokonaniu zapisu, dokładnie taka sama liczba modeli, zostaje odczytana z pamięci \textit{RAM} i ponownie umieszczona w kolejce \textit{READ FIFO}. Następnie kontroler przechodzi do stanu oczekiwania, aż do momentu ponownego zapełnienia się kolejki \textit{TEMP FIFO}.
+Pamięć \textit{RAM} synchronizowana jest innym zegarem niż sygnał z kamery, w związku z tym konieczne jest zastosowanie buforów w postaci dodatkowych kolejek \textit{FIFO}. %%TODO ze wzglęndu na fakt - średni styl
+Omawiany kontroler (moduł \textit{CTRL} na zamieszczonym rysunku) został zaimplementowany jako maszyna stanów. %%TODO napisać, że to moduł CTRL
+Podczas etapu inicjalizacji zapełniona zostaje w całości kolejka \textit{READ FIFO}. 
+Następnie, w momencie gdy pojawi się na wejściu nowa ramka obrazu, modele tła z kolejki \textit{READ FIFO} zostają odczytywane i przekazywane do modułu realizującego algorytm segmentacji tła. 
+Zaktualizowany model tła otrzymany na wyjściu jest umieszczany w kolejce \textit{WRITE FIFO}. 
+Kolejnym krokiem jest przeniesienie danych z kolejki \textit{WRITE FIFO} do dużo krótszej \textit{TEMP FIFO}. 
+W~momencie, gdy kolejka ta jest zapełniona, uruchamiany jest tryb \textit{burst}, zapisujący wszystkie modele do pamięci \textit{RAM}. 
+Po dokonaniu zapisu, dokładnie taka sama liczba modeli, zostaje odczytana z pamięci \textit{RAM} i ponownie umieszczona w kolejce \textit{READ FIFO}. 
+Następnie kontroler przechodzi do stanu oczekiwania, aż do momentu ponownego zapełnienia się kolejki \textit{TEMP FIFO}. 
+
+W zależności od obsługiwanej rozdzielczości zastosowano różne rozmiary opisywanych kolejek. Dane z pamięci \textit{RAM} zawsze odczytywane są w blokach po \num{512} bitów każdy. Dla standardowej rozdzielczości \textit{576p} pojedynczy model tła ma rozmiar \num{1024} bity, kolejka \textit{READ FIFO} w takiej konfiguracji posiada szerokość \num{512} bitów na wejściu oraz \num{1024} na wyjściu i może pomieścić \num{8192} elementy. Druga z~kolejek (\textit{WRITE FIFO}) ma rozmiar \num{2048} oraz szerokość \num{1024} bity na wejściu i \num{512} na wyjściu. W~konfiguracji z wyższą rozdzielczością i modelem tła o rozmiarze \num{256} bitów, pierwsza kolejka musi mieć oczywiście szerokość \num{512} na wejściu i \num{256} na wyjściu. Druga, analogicznie \num{256} na wejściu i \num{512} na wyjściu. W tym przypadku rozmiar obu buforów jest taki sam i wynosi \num{4096}. Ostatni z opisanych elementów, czyli kolejka \textit{TEMP FIFO} we wszystkich konfiguracjach ma takie same parametry, szerokość \num{512} bitów i długość \num{256}.
+
+
+%%TODO może coś o długościach kolejek FIFO...
 
 \section{Implementacja algorytmu ViBE}
 \label{sec:fpga_vibe}
+%%TODO jasno napisać co Pana, co wcześniej było, czy korzystał Pan z tego co było itp..
 
-Przygotowana implementacja sprzętowa, powstała na podstawie opisu teoretycznego metody, przedstawionego w rozdziale \ref{sec:vibe_teoria}, wykorzystano wersję operującą w przestrzeni \textit{CIELab}.  Wysokopoziomowy schemat implementacji, zawierający główny moduł realizujący algorytm, wejściowy i wyjściowy sygnał z kamery oraz połączenie z pamięcią RAM, został przedstawiony na rysunku \ref{fig:vibe_diagram}. Dla zachowania spójności, w dalszej części opisu, przyjęto oznaczenia parametrów algorytmu identyczne jak te zestawione w podsumowaniu rozdziału teoretycznego (podrozdział \ref{subsec:vibe_uwagi}).
+Przygotowana implementacja sprzętowa powstała na podstawie opisu teoretycznego metody -- przedstawionego w rozdziale \ref{sec:vibe_teoria}. Wykorzystano wersję operującą w przestrzeni \textit{CIELab}. Autorzy publikacji \cite{kryjak_14_vibe} udostępnili kod źródłowy w języku \textit{VHDL}, jednak przedstawiona w niniejszym rozdziale wersja została zaimplementowana od zera, przy użyciu języka \textit{Verilog}.  
+Wysokopoziomowy schemat implementacji, zawierający główny moduł realizujący algorytm, wejściowy i wyjściowy sygnał z kamery oraz połączenie z pamięcią RAM, został przedstawiony na rysunku \ref{fig:vibe_diagram}. 
+Dla zachowania spójności, w dalszej części opisu, przyjęto oznaczenia parametrów algorytmu identyczne jak te zestawione w podsumowaniu rozdziału teoretycznego (podrozdział \ref{subsec:vibe_uwagi}).
 
 	\begin{figure}[h!]
 		\centering
@@ -163,11 +288,30 @@ Przygotowana implementacja sprzętowa, powstała na podstawie opisu teoretyczneg
 		\label{fig:vibe_diagram}
 	\end{figure}
 
-W podstawowej wersji algorytmu, wykorzystany został, standardowy interfejs wizyjny, przedstawiony na rysunku \ref{fig:fpga_vision_if}, bez żadnych dodatkowych sygnałów. Pierwszą operacją, jest oczywiście konwersja z przestrzeni \textit{RGB} do \textit{CIELab} (moduł \textit{rgb2cielab}). Operacja przekształcenia do macierzy \textit{XYZ}, opisana równaniem (\ref{equ:vibe_rgb_xyz}), jest prosta do zaimplementowania w logice programowej i została zrealizowana z wykorzystaniem mnożarek sprzętowych operujących na liczbach stałoprzecinkowych. Obliczanie wartości funkcji $f(t)$ zdefiniowanej równaniem (\ref{equ:vibe_f_t}) zostało zaimplementowane z użyciem operacji \textit{LUT} (ang. \textit{Look-Up Table}). Zastosowano trzy moduły, przechowujące stablicowane wartości funkcji $f(\frac{X}{X_n})$, $f(\frac{Y}{Y_n})$, $f(\frac{Z}{Z_n})$ wymagane do obliczenia składowych $a$ i $b$ danych równaniem (\ref{equ:vibe_xyz_cielab}) oraz jeden moduł zawierający wartości składowej $L$. Jak zostało już wspomniane w rozdziale \ref{subsec:vibe_cielab} składowe $a$ i $b$ mieszczą się w przedziale $-128$ do $127$. Natomiast składowa $L$ w zakresie $0$ -- $100$. W związku z tym rozmiar piksela to \textbf{23 bity} zamiast 24, jak miało to miejsce w przypadku przestrzeni \textit{RGB}.
+W podstawowej wersji algorytmu wykorzystany został standardowy interfejs wizyjny przedstawiony na rysunku \ref{fig:fpga_vision_if} -- bez żadnych dodatkowych sygnałów. 
+Pierwszą operacją jest oczywiście konwersja z przestrzeni \textit{RGB} do \textit{CIELab} (moduł \textit{rgb2cielab}). 
+Operacja przekształcenia do macierzy \textit{XYZ}, opisana równaniem (\ref{equ:vibe_rgb_xyz}), jest prosta do zaimplementowania w logice programowej i została zrealizowana z wykorzystaniem mnożarek sprzętowych operujących na liczbach stałoprzecinkowych. 
+Obliczanie wartości funkcji $f(t)$ zdefiniowanej równaniem (\ref{equ:vibe_f_t}) zostało zaimplementowane z użyciem operacji \textit{LUT}. 
+Zastosowano trzy moduły, przechowujące stablicowane wartości funkcji $f(\frac{X}{X_n})$, $f(\frac{Y}{Y_n})$, $f(\frac{Z}{Z_n})$ wymagane do obliczenia składowych $a$ i $b$ danych równaniem (\ref{equ:vibe_xyz_cielab}) oraz jeden moduł zawierający wartości składowej $L$. 
+Jak zostało już wspomniane w rozdziale \ref{subsec:vibe_cielab} składowe $a$ i $b$ mieszczą się w przedziale $-128$ do $127$. 
+Natomiast składowa $L$ w zakresie $0$ -- $100$. 
+W związku z tym rozmiar piksela to \textbf{23 bity} zamiast 24, jak miało to miejsce w przypadku przestrzeni \textit{RGB}.
 
-Dla poszczególnych próbek modelu obliczany jest dystans do aktualnego piksela zgodnie z równaniem (\ref{equ:vibe_cielab_test}). Otrzymana wartość zostaje porównywana z progiem $R$. Operacje te wykonywane są równolegle dla każdej próbki z wykorzystaniem bloczków \textit{match\_test}. Następnie w module \textit{sum}, zliczane są próbki dla których test dopasowania przeszedł pozytywnie. Ostatnim etapem jest blok \textit{classification} dokonujący ostatecznej klasyfikacji piksela zgodnie z równaniem (\ref{equ:vibe_match_test}). Dodatkowo, w celu eliminacji szumów, na maskę wyjściową nakładany jest filtr medianowy o rozmiarze $5x5$.
+Dla poszczególnych próbek modelu obliczany jest dystans do aktualnego piksela zgodnie z równaniem (\ref{equ:vibe_cielab_test}). 
+Otrzymana wartość zostaje porównywana z progiem $R$. 
+Operacje te wykonywane są równolegle dla każdej próbki z wykorzystaniem bloczków \textit{match\_test}. 
+Następnie w module \textit{sum} zliczane są próbki dla których test dopasowania przeszedł pozytywnie. 
+Ostatnim etapem jest blok \textit{classification} dokonujący ostatecznej klasyfikacji piksela zgodnie z równaniem (\ref{equ:vibe_match_test}). Dodatkowo, w celu eliminacji szumów, maska wyjściowa jest filtrowana, wykorzystano filtr medianowy o rozmiarze $5x5$. %%TODO raczej maska jest filtrowana
 
-W procesie aktualizacji modelu wykorzystywany jest, $128$ bitowy, losowy sygnał otrzymany z bloku \textit{rng\_generator}. Idea działania generatora liczb losowych została szerzej opisana w rozdziale \ref{subsec:fpga_generator}. Modułu \textit{update\_arbitrator} jest wykorzystywany do podejmowania decyzji odnośnie aktualizacji. Sama aktualizacja wykonywana jest natomiast w bloku \textit{model\_updater}. W tym celu, generowany jest kontekst o rozmiarze $3x3$, zawierający modele tła sąsiadujących pikseli. Na podstawie informacji, otrzymanych z modułu \textit{update\_arbitrator}, aktualizowany jest model piksela oraz losowo wybranego sąsiada. Następnie nowy model zostaje zapisany do pamięci \textit{RAM}. Warto zwrócić uwagę, że model jest odczytywany z pamięci po konwersji do przestrzeni \textit{CIELab}, aby wykorzystać go w procesie aktualizacji, konieczne jest zastosowanie linii opóźniającej o długości równej latencji procesu klasyfikacji piksela, operacja ta została zrealizowana przez moduł \textit{delay}.
+W procesie aktualizacji modelu wykorzystywany jest $128$ bitowy losowy sygnał otrzymany z bloku \textit{rng\_generator}. 
+Idea działania generatora liczb losowych została szerzej opisana w rozdziale \ref{subsec:fpga_generator}. 
+Modułu \textit{update\_arbitrator} jest wykorzystywany do podejmowania decyzji odnośnie aktualizacji. 
+Sama aktualizacja wykonywana jest natomiast w bloku \textit{model\_updater}. 
+W tym celu, generowany jest kontekst o rozmiarze $3x3$, zawierający modele tła sąsiadujących pikseli. 
+Na podstawie informacji, otrzymanych z modułu \textit{update\_arbitrator}, aktualizowany jest model piksela oraz losowo wybranego sąsiada.
+Następnie nowy model zostaje zapisany do pamięci \textit{RAM}. 
+Warto zwrócić uwagę, że model jest odczytywany z pamięci po konwersji do przestrzeni \textit{CIELab}, aby wykorzystać go w procesie aktualizacji, konieczne jest zastosowanie linii opóźniającej o długości równej latencji procesu klasyfikacji piksela. 
+Operacja ta została zrealizowana przez moduł \textit{delay}.
 
 	\begin{figure}[h!]
 		\centering
@@ -176,10 +320,25 @@ W procesie aktualizacji modelu wykorzystywany jest, $128$ bitowy, losowy sygnał
 		\label{fig:vibe_demo}
 	\end{figure}
 
-Przedstawioną implementację udało się uruchomić w rozdzielczościach: \textit{576p}, \textit{720p}, \textit{1080p} w 50 klatkach na sekundę. Na rysunku \ref{fig:vibe_demo} przedstawiono zdjęcie działającego systemu. W przypadku najniższej rozdzielczości przyjęto model składający się z $N=20$ próbek (rozmiar modelu wynosi w tym przypadku $20 \cdot 23=460$ bitów). Dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, musiał on zostać ograniczony do $10$ (rozmiar modelu równy $10 \cdot 23=230$ bity). Pozostałym parametrom przypisano wartości domyślne, zostały one zapisane jako liczny całkowite. Wyjątkiem jest parametr $T$, opisujący prawdopodobieństwo wykonania aktualizacji, w tym przypadku została wykorzystana 16 bitowa liczba stałoprzecinkowa (ang. \textit{fixed float}) bez znaku o oznaczeniu \textit{8z8u}, czyli po 8 bitów przeznaczonych na część całkowitą i ułamkową.
+Przedstawioną implementację udało się uruchomić w rozdzielczościach: \textit{576p}, \textit{720p}, \textit{1080p} w 50 klatkach na sekundę. 
+%TODO a tą średnią ruchomą to jak się udało uruchomić ??? - uruchomienie tych podstawowych metod uznałem za oczywiste, skupiłem się na opisywaniu tylko tych bardziej złożonych
+Na rysunku \ref{fig:vibe_demo} przedstawiono zdjęcie działającego systemu. 
+W przypadku najniższej rozdzielczości przyjęto model składający się z $N=20$ próbek (rozmiar modelu wynosi w tym przypadku $20 \cdot 23=460$ bitów). 
+Dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, musiał on zostać ograniczony do $10$ (rozmiar modelu równy $10 \cdot 23=230$ bity). 
+Pozostałym parametrom przypisano wartości domyślne, zostały one zapisane jako liczny całkowite. 
+Wyjątkiem jest parametr $T$, opisujący prawdopodobieństwo wykonania aktualizacji, w tym przypadku została wykorzystana 16 bitowa liczba stałoprzecinkowa (ang. \textit{fixed point}) bez znaku o oznaczeniu \textit{8z8u}, czyli po 8 bitów przeznaczonych na część całkowitą i ułamkową.
+%%TODO fixe point chyba, 
+%TODO tu by trzeba lepiej przedstawić dlaczego trzeba to ogranicznać...
 
-Zużycie zasobów w układzie \textit{FPGA} zamieszczono w tabeli \ref{tab:vibe_utilization} i \ref{tab:vibe_hd_utilization}, odpowiednio dla rozdzielczości \textit{576p} oraz \textit{1080p}. Oszacowany w obu przypadkach pobór mocy wynosi \num{3.957}W i \num{3.370}W . Można zauważyć wyraźny wzrost wykorzystania dostępnych zasobów w stosunku do algorytmu odejmowania ramek (tabla \ref{tab:sub_utilization}), wynika to oczywiście ze zdecydowanie bardziej rozbudowanej logiki algorytmu. Na zdecydowanie większe użycie \textit{LUT} miało wpływ między innymi zastosowanie konwersji \textit{RGB}--\textit{CIELab}, gdzie konieczne było tablicowanie wartości niektórych funkcji. Pamięć \textit{BRAM} została z kolei wykorzystana w długich liniach opóźniających piksele jak i cały model tła. Warto jeszcze raz zaznaczyć, że w przypadku wyższej rozdzielczości konieczne było ograniczenie rozmiaru modelu (ze względu na ograniczenia zewnętrznej pamięci \textit{RAM}). W związku z tym, ostateczne zużycie zasobów w systemie pracującym w \textit{1080p@50fps} jest niższe niż dla \textit{576p@50fps}. 
-
+Użycie zasobów logicznych układu \textit{FPGA} zamieszczono w tabelach \ref{tab:vibe_utilization} i \ref{tab:vibe_hd_utilization}, odpowiednio dla rozdzielczości \textit{576p} oraz \textit{1080p}.
+Oszacowany w obu przypadkach pobór mocy wynosi \num{3.957}W i \num{3.370}W. %%TODO dla wyższej mnie ? coś to nie tak.... - jest wyjaśnienie na koncu akapitu
+W celu uproszczenia implementacji, dla rozdzielczości \textit{720p} i \textit{1080p} zastosowano te same rozmiary kolejek i linii opóźniających (zmieniono jedynie stałą \textit{H\_SIZE}), w związku z tym zarówno pobór mocy jak i wykorzystanie zasobów w obu przypadkach jest identyczne. %%TODO a co z 720p ?
+Można zauważyć wyraźny wzrost wykorzystania dostępnych zasobów w stosunku do algorytmu odejmowania ramek (tabla \ref{tab:sub_utilization}), wynika to oczywiście ze zdecydowanie bardziej rozbudowanej logiki algorytmu. 
+Na wyraźnie większe użycie \textit{LUT} miało wpływ między innymi zastosowanie konwersji \textit{RGB}--\textit{CIELab}, gdzie konieczne było tablicowanie wartości niektórych funkcji. %%TODO powt zdecydowanie
+Pamięć \textit{BRAM} została z kolei wykorzystana w długich liniach opóźniających piksele jak i cały model tła. 
+Warto jeszcze raz zaznaczyć, że w przypadku wyższej rozdzielczości konieczne było ograniczenie rozmiaru modelu (ze względu na ograniczenia zewnętrznej pamięci \textit{RAM}). 
+W związku z tym, ostateczne zużycie zasobów w systemie pracującym w \textit{1080p@50fps} jest niższe niż dla \textit{576p@50fps}. 
+%%TODO może by jednak wyśrodkować te tabelki ... - próbowałem wyśrodkować, moim zdaniem tak jest bardziej czytelnie
 	\begin{table}[h!]
 		\centering
 		\begin{threeparttable}
@@ -247,7 +406,11 @@ Zużycie zasobów w układzie \textit{FPGA} zamieszczono w tabeli \ref{tab:vibe_
 \section{Implementacja rozszerzonej wersji ViBE}
 \label{sec:fpga_vibe_plus}
 
-W rozdziale \ref{subsec:vibe_ruchoma_kamera} opisany został dodatkowy mechanizm, usprawniający pracę algorytmu w przypadku występowania drgań kamery (ang. \textit{camera jitter}). Schemat implementacji rozszerzonej wersji algorytmu, zawierającej ten dodatkowy moduł, został przedstawiony na rysunku \ref{fig:vibe_plus_diagram}. Implementacja odpowiada opisowi teoretycznemu, który został przedstawiony w podrozdziale \ref{subsec:vibe_ruchoma_kamera}. Oprócz bloku realizującego standardowy algorytm \textit{ViBE}, opisanego szczegółowo w poprzednim rozdziale, ta wersja algorytmu zawiera także szereg modułów zapewniających prawidłowe przesunięcie modelu tła na podstawie wyznaczonego przepływu optycznego. Moduł, podobnie jak poprzednia wersja, wykorzystuje standardowy interfejs wizyjny, schemat modelu tła jest również identyczna jak w podstawowej wersji algorytmu. 
+W rozdziale \ref{subsec:vibe_ruchoma_kamera} opisany został dodatkowy mechanizm usprawniający pracę algorytmu, w przypadku występowania drgań kamery (ang. \textit{camera jitter}). 
+Schemat implementacji rozszerzonej wersji algorytmu, zawierającej dodatkowy moduł, został przedstawiony na rysunku \ref{fig:vibe_plus_diagram}.
+Implementacja odpowiada opisowi teoretycznemu, który został przedstawiony w podrozdziale \ref{subsec:vibe_ruchoma_kamera}. 
+Oprócz bloku realizującego standardowy algorytm \textit{ViBE}, opisanego szczegółowo w poprzednim rozdziale, ta wersja algorytmu zawiera także szereg modułów zapewniających prawidłowe przesunięcie modelu tła na podstawie wyznaczonego przepływu optycznego. 
+Moduł, podobnie jak poprzednia wersja, wykorzystuje standardowy interfejs wizyjny, schemat modelu tła jest również identyczny jak w podstawowej wersji algorytmu. W tym przypadku wykorzystany został w całości kod źródłowy w języku \textit{Verilog}, udostępniony przez autorów. Dodatkowy moduł został zintegrowany z implementacją opisaną w poprzednim rozdziale.
 	
 	\begin{figure}[h!]
 		\centering
@@ -256,18 +419,42 @@ W rozdziale \ref{subsec:vibe_ruchoma_kamera} opisany został dodatkowy mechanizm
 		\label{fig:vibe_plus_diagram}
 	\end{figure}
 
-Pierwszym krokiem, podczas obliczania przepływu optycznego, jest konwersja obrazu z przestrzeni \textit{RGB} do skali szarości. Jest to wykonywane poprzez moduł \textit{rgb2gray}. Przekształcony sygnał z kamery jest następnie podawany na wejście bloku \textit{disp\_comp}, realizującego operację wyznaczania przesunięcia modelu na podstawie wyliczonego przepływu optycznego. Jest to najbardziej złożony moduł w całej implementacji. Jego szczegółowy schemat został przedstawiony na rysunku \ref{fig:displacement_diagram}. Na podstawie otrzymanego wektora przesunięcia blok \textit{bg\_shift} zapewnia prawidłową synchronizację i odczyt kolejnych modeli tła z~pamięci \textit{RAM}. Ze względu na przesunięcie, operacja odczytu, musi zostać wykonana z odpowiednim wyprzedzeniem lub opóźnieniem. Dane z pamięci \textit{RAM} są umieszczane w kolejce \textit{FIFO} (ang. \textit{First In First Out} -- pierwszy na wejściu, pierwszy na wyjściu). Skąd następnie są pobierane przez algorytm \textit{ViBE}. Kolejka \textit{FIFO}, podobnie jak linie opóźniające, została zaimplementowana z wykorzystaniem pamięci blokowej (\textit{BRAM}). Dzięki zastosowaniu uniwersalnego interfejsu z niezależnymi sygnałami odczytu i~zapisu do pamięci RAM, nie było konieczności modyfikowania oryginalnej implementacji metody \textit{ViBE}. Na maskę wyjściową, nakładany jest filtr medianowy o rozmiarze $5x5$, dodatkowo został zaimplementowany moduł wizualizujący operację obliczania przepływu optycznego.
+Pierwszym krokiem, podczas obliczania przepływu optycznego, jest konwersja obrazu z przestrzeni \textit{RGB} do skali szarości. 
+Jest to wykonywane poprzez moduł \textit{rgb2gray}. 
+Przekształcony sygnał z kamery jest następnie podawany na wejście bloku \textit{disp\_comp} realizującego operację wyznaczania przesunięcia modelu na podstawie wyliczonego przepływu optycznego. 
+Jest to najbardziej złożony moduł w całej implementacji. 
+Jego szczegółowy schemat został przedstawiony na rysunku \ref{fig:displacement_diagram}. 
+Na podstawie otrzymanego wektora przesunięcia blok \textit{bg\_shift} zapewnia prawidłową synchronizację i odczyt kolejnych modeli tła z~pamięci \textit{RAM}. 
+Ze względu na przesunięcie operacja odczytu musi zostać wykonana z odpowiednim wyprzedzeniem lub opóźnieniem. 
+Dane z pamięci \textit{RAM} są umieszczane w kolejce \textit{FIFO}.
+Skąd następnie są pobierane przez algorytm \textit{ViBE}. 
+Kolejka \textit{FIFO}, podobnie jak linie opóźniające, została zaimplementowana z wykorzystaniem pamięci blokowej (\textit{BRAM}). 
+Dzięki zastosowaniu uniwersalnego interfejsu z niezależnymi sygnałami odczytu i~zapisu do pamięci RAM, nie było konieczności modyfikowania oryginalnej implementacji metody \textit{ViBE}. 
+Na maskę wyjściową, nakładany jest filtr medianowy o rozmiarze $5x5$, dodatkowo został zaimplementowany moduł wizualizujący operację obliczania przepływu optycznego.
 
-Rozszerzona wersja algorytmu operuje jedynie na rozdzielczości \textit{720x576}. Zastosowano identyczne parametry jak w podstawowej wersji metody, czyli model tła składający się z 20 próbek w przestrzeni \textit{CIELab}. Składowa wektora przesunięcia może przyjąć maksymalnie wartość $32$, zatem kolejka \textit{FIFO} gromadząca modele tła musi mieć długość $32 \cdot$\textit{H\_SIZE}$+32$, gdzie każdy element ma szerokość równą modelowi tła. Dla obsługiwanej rozdzielczości parametr \textit{H\_SIZE} wynosi 864, natomiast model tła ma rozmiar 460 bitów. Ostatecznie ustawiono szerokość pojedynczego elementu na 512 bitów, natomiast głębokość kolejki wynosi 32768.  
+Z uwagi na dodatkowy mechanizm obsługujący ruch kamery, rozszerzona wersja algorytmu operuje jedynie na rozdzielczości \textit{720x576}. %%TODO napisać dlaczego tzn inny szyk tego akapitu. Ze z uwagi na to, że ten kontekst to...
+Zastosowano identyczne parametry jak w podstawowej wersji metody, czyli model tła składający się z 20 próbek w przestrzeni \textit{CIELab}.
+Składowa wektora przesunięcia może przyjąć maksymalnie wartość $32$, zatem kolejka \textit{FIFO} gromadząca modele tła musi mieć długość $32 \cdot$\textit{H\_SIZE}$+32$, gdzie każdy element ma szerokość równą modelowi tła. 
+Dla obsługiwanej rozdzielczości parametr \textit{H\_SIZE} wynosi 864, natomiast model tła ma rozmiar 460 bitów. Ostatecznie ustawiono szerokość pojedynczego elementu na 512 bitów, natomiast głębokość kolejki wynosi 32768.  
 
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.25]{img/4/displacement_vector_diagram.png}
-		\caption{Implementacja modułu wyznaczającego wektor przesunięcia -- źródło \cite{}}
+		\caption{Implementacja modułu wyznaczającego wektor przesunięcia -- źródło \cite{kryjak_14_vibe}} %%TODO źródło !!!
 		\label{fig:displacement_diagram}
 	\end{figure}
 
-Moduł realizujący wyznaczanie wektora przesunięcia, jest najbardziej złożonym elementem algorytmu. Opis teoretyczny tej metody został przedstawiony w podrozdziale \ref{subsec:vibe_of}. pierwszym krokiem algorytmu jest detekcja narożników metodą Harrisa-Stephensa. Schemat przedstawiający implementację tej funkcji został pokazany na rysunku \ref{fig:harris_diagram}. Wykonane tam operacje odpowiadają opisowi teoretycznemu zamieszczonemu w podrozdziale \ref{subsec:vibe_harris}. Przy implementacji uwzględniono w maksymalnym stopniu możliwości układu FPGA w zakresie zrównoleglania obliczeń. Moduły \textit{prewitt\_x} i \textit{prewitt\_y} realizują detekcję krawędzi pionowych i poziomych. Następnie wszystkie trzy elementy macierzy $H$ są obliczane równolegle. Po dokonaniu operacji wygładzania filtrem Gaussa (blok \textit{gaussian\_blur}) w bloku \textit{rescaling} następuje przeskalowanie (dzielenie przez $2^10$) otrzymanych wartości. Finalnie wyznaczany jest wyznacznik macierzy $H$, zgodnie z równaniem (\ref{equ:vibe_harris_response_final}). Całość została zrealizowana z wykorzystaniem sprzętowych mnożarek i sumatorów. Konieczne jest wykonanie 6 operacji mnożenia, jednego dodawania i dwóch odejmowania.
+Opis teoretyczny tej metody został przedstawiony w podrozdziale \ref{subsec:vibe_of}. 
+Pierwszym krokiem algorytmu jest detekcja narożników metodą Harrisa-Stephensa. 
+Schemat przedstawiający implementację tej funkcji został pokazany na rysunku \ref{fig:harris_diagram}. 
+Wykonane tam operacje odpowiadają opisowi teoretycznemu zamieszczonemu w podrozdziale \ref{subsec:vibe_harris}. 
+Przy implementacji uwzględniono w maksymalnym stopniu możliwości układu FPGA w zakresie zrównoleglania obliczeń. 
+Moduły \textit{prewitt\_x} i \textit{prewitt\_y} realizują detekcję krawędzi pionowych i poziomych. 
+Następnie wszystkie trzy elementy macierzy $H$ są obliczane równolegle. 
+Po dokonaniu operacji wygładzania filtrem Gaussa (blok \textit{gaussian\_blur}) w bloku \textit{rescaling} następuje przeskalowanie (dzielenie przez $2^10$) otrzymanych wartości. 
+Finalnie wyznaczany jest wyznacznik macierzy $H$ -- zgodnie z równaniem (\ref{equ:vibe_harris_response_final}). 
+Całość została zrealizowana z wykorzystaniem sprzętowych mnożarek i sumatorów. 
+Konieczne jest wykonanie 6 operacji mnożenia, jednego dodawania i dwóch odejmowania.
  
 	\begin{figure}[h!]
 		\centering
@@ -276,19 +463,34 @@ Moduł realizujący wyznaczanie wektora przesunięcia, jest najbardziej złożon
 		\label{fig:harris_diagram}
 	\end{figure}
 
-Równolegle do detekcji krawędzi wyznaczany jest kontekst aktualnego piksela o rozmiarze $3x3$, określana jest także jego pozycja w aktualnie przetwarzanym bloku o rozmiarze $32x32$. Piksel dla którego otrzymano najmniejszą wartość współczynnika $R$ w obszarze każdego bloku zostaje zapisany razem z kontekstem $3x3$ w kolejce \textit{FIFO} (w przypadku obrazu o rozdzielczości \textit{720x576} konieczne jest zdefiniowanie kolejki o rozmiarze 396, gdyż tyle jest bloków $32x32$ w jednej ramce). Kolejne elementy z~kolejki, są pobierane w trakcie przetwarzania następnej ramki obrazu. W każdym z bloków znajdowana jest minimalna wartość sumy różnicy modułów pomiędzy pikselem pobranym z kolejki i pikselami z~aktualnej ramki obrazu. Znaleziona wartość, wraz z wektorem przesunięcia, zostaje po raz kolejny zapamiętana w pamięci blokowej. 
+Równolegle do detekcji krawędzi wyznaczany jest kontekst aktualnego piksela o rozmiarze $3x3$. 
+Określana jest także jego pozycja w aktualnie przetwarzanym bloku o rozmiarze $32x32$. 
+Piksel dla którego otrzymano największą wartość współczynnika $R$ w obszarze każdego bloku zostaje zapisany razem z kontekstem $3x3$ w kolejce \textit{FIFO} (w przypadku obrazu o rozdzielczości \textit{720x576} konieczne jest zdefiniowanie kolejki o rozmiarze 396, gdyż tyle jest bloków $32x32$ w jednej ramce). %%TODO najmniejszą, czy największą ?
+Kolejne elementy z~kolejki, są pobierane w trakcie przetwarzania następnej ramki obrazu. 
+W każdym z bloków znajdowana jest minimalna wartość sumy różnicy modułów pomiędzy pikselem pobranym z kolejki i pikselami z~aktualnej ramki obrazu.
+Znaleziona wartość, wraz z wektorem przesunięcia, zostaje po raz kolejny zapamiętana w pamięci blokowej. 
+%TODO to powinno być mocniej powiązane z tym rysunkiem 4.11
 
-Ostatnim krokiem, jest obliczenie mediany przesunięcia $dx$ i $dy$ wśród znalezionych wartości minimalnych. Operacja ta, składa się z dwóch etapów, wykonywanych w momencie przerwy pomiędzy kolejnymi ramkami obrazu (wartość sygnału \textit{vsync} wynosi wtedy $0$). Najpierw wyliczany jest histogram wartości $dx$ i $dy$, równolegle zliczana jest także ilość próbek. Drugim krokiem jest sumowanie wartości histogramu. Poprzez mediane, rozumiemy wartość, dla której aktualna suma wartości histogramu jest większa niż połowa liczby wszystkich próbek. Do obliczenia histogramu ponownie został wykorzystany moduł pamięci blokowej (\textit{BRAM}). Na rysunku \ref{fig:vibe_plus_demo} przedstawiono wizualizację wyznaczanego przepływu optycznego, analogiczną do tej pokazanej na rysunku \ref{fig:vibe_of_example}.
+Ostatnim krokiem jest obliczenie mediany przesunięcia $dx$ i $dy$ wśród znalezionych wartości minimalnych. 
+Operacja ta składa się z dwóch etapów wykonywanych w momencie przerwy pomiędzy kolejnymi ramkami obrazu (wartość sygnału \textit{vsync} wynosi wtedy $0$). 
+Najpierw wyliczany jest histogram wartości $dx$ i $dy$, równolegle zliczana jest także liczba próbek. 
+Drugim krokiem jest sumowanie wartości histogramu. 
+Poprzez medianę rozumiemy wartość dla której aktualna suma wartości histogramu jest większa niż połowa liczby wszystkich próbek. 
+Do obliczenia histogramu ponownie został wykorzystany moduł pamięci blokowej (\textit{BRAM}). 
+Na rysunku \ref{fig:vibe_plus_demo} przedstawiono wizualizację wyznaczanego przepływu optycznego, analogiczną do tej pokazanej na rysunku \ref{fig:vibe_of_example}.
 
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[scale=0.2]{img/4/vibe_plus_example.png}
-		\caption{Wizualizacja przepływu optycznego}
+		\caption{Wizualizacja przepływu optycznego} %TODO trochę by się to przydało "podrasować", bo mało widać... może większe, może tylko framgent, ew. drobna korekta w paint....
 		\label{fig:vibe_plus_demo}
 	\end{figure}
 	
 
-W tabeli \ref{tab:vibe_plus_utilization} zamieszczono zużycie zasobów w układzie \textit{FPGA}, oszacowany pobór mocy wynosi \num{4.011}W. W porównaniu do standardowej wersji algorytmu (tabela \ref{tab:vibe_utilization}) można zauważyć znaczący wzrost wykorzystania pamięci \textit{BRAM}. Algorytm obliczania przepływu optycznego wymaga dodatkowej pamięci, która wykorzystywana jest do przechowywania informacji z każdego bloku oraz do obliczania mediany. Wzrost zużycia pozostałych zasobów jest minimalny.
+W tabeli \ref{tab:vibe_plus_utilization} zamieszczono użycie zasobów w układzie \textit{FPGA}, oszacowany pobór mocy wynosi \num{4.011}W. 
+W porównaniu do standardowej wersji algorytmu (tabela \ref{tab:vibe_utilization}) można zauważyć znaczący wzrost wykorzystania pamięci \textit{BRAM}. 
+Algorytm obliczania przepływu optycznego wymaga dodatkowej pamięci, która wykorzystywana jest do przechowywania informacji z każdego bloku oraz do obliczania mediany. 
+Wzrost zużycia pozostałych zasobów jest minimalny.
 
 	\begin{table}[h!]
 		\centering
@@ -323,10 +525,16 @@ W tabeli \ref{tab:vibe_plus_utilization} zamieszczono zużycie zasobów w układ
 	\end{table}
 
 
+
 \section{Implementacja algorytmu PBAS}
 \label{sec:fpga_pbas}
 
-Szczegółowy opis teoretyczny algorytmu \textit{PBAS} został zamieszczony w podrozdziale \ref{sec:pbas_teoria}. Zaimplementowano wariant operujący w przestrzeni kolorów \textit{RGB} w rozdzielczości \textit{720x576} pikseli oraz wersję przetwarzającą obraz w skali szarości, w przypadku wyższych rozdzielczości (\textit{720p} i \textit{1080p}). Wysokopoziomowy schemat całego algorytmu został przedstawiony na rysunku \ref{fig:pbas_diagram}. Jak zostało już wspomniane w części teoretycznej, wersja algorytmu działająca w przestrzeni \textit{RGB}, przetwarza niezależnie poszczególne składowe, tworząc dla każdej z nich osobny model tła. 
+%TODO tu tak samo, jak to się ma do wcześniejszych badań !
+
+Szczegółowy opis teoretyczny algorytmu \textit{PBAS} został zamieszczony w podrozdziale \ref{sec:pbas_teoria}. 
+Zaimplementowano wariant operujący w przestrzeni kolorów \textit{RGB} w rozdzielczości \textit{720x576} pikseli oraz wersję przetwarzającą obraz w skali szarości w przypadku wyższych rozdzielczości (\textit{720p} i \textit{1080p}). 
+Wysokopoziomowy schemat całego algorytmu został przedstawiony na rysunku \ref{fig:pbas_diagram}. 
+Jak zostało już wspomniane w części teoretycznej, wersja algorytmu działająca w przestrzeni \textit{RGB}, przetwarza niezależnie poszczególne składowe, tworząc dla każdej z nich osobny model tła. Podobnie jak w przypadku algorytmu \textit{ViBE} (rozdział \ref{fpga_vibe}), ta podstawowa wersja metody została zaimplementowana od podstaw z wykorzystaniem języka \textit{Verilog}. 
 	
 	\begin{figure}[h!]
 		\centering
@@ -335,7 +543,14 @@ Szczegółowy opis teoretyczny algorytmu \textit{PBAS} został zamieszczony w po
 		\label{fig:pbas_diagram}
 	\end{figure}
 
-Pierwszą operacją, jest rozbicie sygnału wejściowego na składowe \textit{RGB}. Następnie każda z nich jest analizowana niezależnie poprzez algorytm \textit{PBAS} (blok \textit{PBAS\_1C}). Szczegółowy schemat implementacji modułu, realizującego algorytm dla jednej składowej, przedstawiono na rysunku \ref{fig:pbas_1c_diagram}. Maska finalna stanowi alternatywę logiczną wyników otrzymanych z poszczególnych modułów. Podobnie jak w przypadku innych algorytmów, tutaj także, na koniec, nakładany jest filtr medianowy w celu wyeliminowania szumów i zakłóceń. Algorytm wykorzystuje także generator liczb losowych, zaimplementowany w module \textit{rng\_generator}. Jego opis został szerzej przedstawiony w podrozdziale \ref{subsec:fpga_generator}. Opisywany moduł wykorzystuje oczywiście uniwersalny interfejs wizyjny przedstawiony w rozdziale \ref{sec:uklad_interfejs}. 
+Pierwszą operacją, jest rozbicie sygnału wejściowego na składowe \textit{RGB}. 
+Następnie każda z nich jest analizowana niezależnie poprzez algorytm \textit{PBAS} (blok \textit{PBAS\_1C}). 
+Szczegółowy schemat implementacji modułu realizującego algorytm dla jednej składowej przedstawiono na rysunku \ref{fig:pbas_1c_diagram}. 
+Maska finalna stanowi alternatywę logiczną wyników otrzymanych z poszczególnych modułów. 
+Podobnie jak w przypadku innych algorytmów, tutaj także, na koniec, nakładany jest filtr medianowy w celu wyeliminowania szumów i zakłóceń.
+Algorytm wykorzystuje także generator liczb losowych, zaimplementowany w module \textit{rng\_generator}. 
+Jego opis został szerzej przedstawiony w podrozdziale \ref{subsec:fpga_generator}. 
+Opisywany moduł wykorzystuje oczywiście uniwersalny interfejs wizyjny przedstawiony w rozdziale \ref{sec:uklad_interfejs}. 
 	
 	\begin{figure}[h!]
 		\centering
@@ -344,12 +559,33 @@ Pierwszą operacją, jest rozbicie sygnału wejściowego na składowe \textit{RG
 		\label{fig:pbas_1c_diagram}
 	\end{figure}	
 	
-Implementacja algorytmu \textit{PBAS} przedstawiona na rysunku \ref{fig:pbas_1c_diagram}, operującego na jednej składowej \textit{RGB} bądź skali szarości, jest bardzo podobna do implementacji metody \textit{ViBE} przedstawionej w rozdziale \ref{sec:fpga_vibe}. Podobnie jak w tamtym przypadku, tutaj także, pierwszym krokiem, jest równoległy test dopasowania do próbek zapisanych w pamięci \textit{RAM}, zgodnie z równaniem (\ref{equ:pbas_dist}). Następnie przeprowadzana jest klasyfikacja, opisana równaniem (\ref{equ:pbas_test}). Dodatkowo obliczany jest minimalny dystans pomiędzy próbkami z modelu a aktualnym pikselem oraz średnia wartość odległości zapisanych w modelu tła. Tak samo jak w metodzie \textit{ViBE}, decyzja o podjęciu aktualizacji realizowana jest przez moduł \textit{update\_arbitrator}. Blok dokonujący aktualizacji, jest rozszerzeniem tego co zostało zaprezentowane w implementacji metody \textit{ViBE}. Dodatkowo, oprócz próbek, aktualizowany jest także zbiór minimalnych odległości oraz parametry $R$ i $T$, zgodnie z równaniami (\ref{equ:pbas_r_update}) i (\ref{equ:pbas_t_update}).
+Implementacja algorytmu \textit{PBAS}, operującego na jednej składowej \textit{RGB} bądź skali szarości. została przedstawiona na rysunku \ref{fig:pbas_1c_diagram}, jak łatwo zauważyć jest bardzo podobna do implementacji metody \textit{ViBE} przedstawionej w rozdziale \ref{sec:fpga_vibe}. 
+%TODO coś styl tego zdania do poprawy
+Podobnie jak w tamtym przypadku, tutaj także, pierwszym krokiem jest równoległy test dopasowania do próbek zapisanych w pamięci \textit{RAM}, zgodnie z równaniem (\ref{equ:pbas_dist}). 
+Następnie przeprowadzana jest klasyfikacja, opisana równaniem (\ref{equ:pbas_test}). 
+Dodatkowo obliczany jest minimalny dystans pomiędzy próbkami z modelu, a aktualnym pikselem oraz średnia wartość odległości zapisanych w modelu tła.
+Tak samo jak w metodzie \textit{ViBE}, decyzja o podjęciu aktualizacji realizowana jest przez moduł \textit{update\_arbitrator}. 
+Blok dokonujący aktualizacji, jest rozszerzeniem tego co zostało zaprezentowane w implementacji metody \textit{ViBE}. 
+Dodatkowo, oprócz próbek, aktualizowany jest także zbiór minimalnych odległości oraz parametry $R$ i $T$, zgodnie z równaniami (\ref{equ:pbas_r_update}) i (\ref{equ:pbas_t_update}).
 
-Pierwsza część modelu składa się z $N$ próbek, każda próbka zawiera wartość piksela -- $B_i$ oraz zapamiętany minimalny dystans -- $D_i$ pomiędzy aktualną próbką a aktualną wartością piksela. Na końcu znajdują się parametry $R$ i $T$. Modele dla poszczególnych składowych \textit{RGB} ustawione kolejno po sobie. Dla rozdzielczości \textit{576p} przyjęto model składający się z $N=19$ próbek. Parametry $R$ i $T$ zapisano w postaci 16-bitowych liczb stałoprzecinkowych w formacie \textit{8z8u}. Minimalny dystans, podobnie jak próbka, zapisana jest jako 8-bitowa liczba całkowita. Sumarycznie model tła dla jednej składowej \textit{RGB} ma rozmiar $19 \cdot (8+8) + 16 + 16 = 336$ bitów, zatem cały model zajmuje $3 \cdot 336 = 1008$ bitów. Dla wyższych rozdzielczości wykorzystano algorytm operujący na obrazie w skali szarości, model w tym przypadku składa się z $N=14$ próbek. Zatem, cały model, można zapisać za pomocą $14 \cdot (8+8) + 16 + 16 = 256$, jest to maksymalna szerokość modelu, która może zostać wykorzystana w przypadku obrazu w rozdzielczości \textit{720p} lub \textit{1080p}. 
+Pierwsza część modelu składa się z $N$ próbek, każda próbka zawiera wartość piksela -- $B_i$ oraz zapamiętany minimalny dystans -- $D_i$ pomiędzy aktualną próbką a aktualną wartością piksela. 
+Na końcu znajdują się parametry $R$ i $T$. 
+Modele dla poszczególnych składowych \textit{RGB} ustawione kolejno po sobie. 
+Dla rozdzielczości \textit{576p} przyjęto model składający się z $N=19$ próbek. 
+Parametry $R$ i $T$ zapisano w postaci 16-bitowych liczb stałoprzecinkowych w formacie \textit{8z8u}. 
+Minimalny dystans, podobnie jak próbka, zapisana jest jako 8-bitowa liczba całkowita. 
+Sumarycznie model tła dla jednej składowej \textit{RGB} ma rozmiar $19 \cdot (8+8) + 16 + 16 = 336$ bitów, zatem cały model zajmuje $3 \cdot 336 = 1008$ bitów. 
+Dla wyższych rozdzielczości wykorzystano algorytm operujący na obrazie w skali szarości, model w tym przypadku składa się z $N=14$ próbek. 
+Zatem cały model można zapisać za pomocą $14 \cdot (8+8) + 16 + 16 = 256$, jest to maksymalna szerokość modelu, która może zostać wykorzystana w przypadku obrazu w rozdzielczości \textit{720p} lub \textit{1080p}. Wykorzystanie zasobów jest identyczne dla obu rozdzielczości, ze względu na uproszczenia w implementacji. Wykorzystano te same bufory zarówno w kontrolerze pamięci jak i w długich liniach opóźniających (dokonano jedynie modyfikacji parametry \textit{H\_SIZE}).
+%%TODO zastanawia mnię dlaczego wartości dla 720p i 1080p są takie same. To jest jakoś uzasadnione, czy tylko wynikiem uproszczeń.
 
-
-Zużycie zasobów dla algorytmu \textit{PBAS} w wersji \textit{576p@50fps} i \textit{1080p@50fps} zamieszczono w tabelach \ref{tab:pbas_utilization} i \ref{tab:pbas_hd_utilization}, pobór mocy w obu przypadkach wynosi odpowiednio \num{4.686}W i \num{3.263}W. Należy jeszcze raz podkreślić, że dla wyższej rozdzielczości zastosowano algorytm operujący na obrazie w skali szarości z dużo mniej dokładnym modelem tła. Takie działanie wymuszone było ograniczeniami zewnętrznej pamięci \textit{RAM}. Ostatecznie z tego powodu zużycie zasobów oraz pobór mocy dla rozdzielczości \textit{1080p} jest zdecydowanie niższy niż dla \textit{576p}. W porównaniu do algorytmu \textit{ViBE} (tabela \ref{tab:vibe_utilization}) możemy zauważyć znaczący wzrost wykorzystywanych zasobów. Taki rezultat jest zgodny z oczekiwaniami, gdyż jak zostało już wcześniej powiedziane, omawiany algorytm jest rozszerzeniem metody \textit{ViBE}.
+Użycie zasobów dla algorytmu \textit{PBAS} w wersji \textit{576p@50fps} i \textit{1080p@50fps} zamieszczono w tabelach \ref{tab:pbas_utilization} i \ref{tab:pbas_hd_utilization}, pobór mocy w obu przypadkach wynosi odpowiednio \num{4.686}W i \num{3.263}W. 
+Należy jeszcze raz podkreślić, że dla wyższej rozdzielczości zastosowano algorytm operujący na obrazie w skali szarości z dużo mniej dokładnym modelem tła. 
+Takie działanie wymuszone było ograniczeniami zewnętrznej pamięci \textit{RAM} i w rezultacie mniejszym rozmiarem modelu tła. 
+%%TODO też by to trzeba lepiej skomentować.
+Ostatecznie z tego powodu zużycie zasobów oraz pobór mocy dla rozdzielczości \textit{1080p} jest zdecydowanie niższy niż dla \textit{576p}. 
+W porównaniu do algorytmu \textit{ViBE} (tabela \ref{tab:vibe_utilization}) możemy zauważyć znaczący wzrost wykorzystywanych zasobów. 
+Taki rezultat jest zgodny z oczekiwaniami, gdyż jak zostało już wcześniej powiedziane, omawiany algorytm jest rozszerzeniem metody \textit{ViBE}.
 
 	\begin{table}[h!]
 		\centering
@@ -418,7 +654,12 @@ Zużycie zasobów dla algorytmu \textit{PBAS} w wersji \textit{576p@50fps} i \te
 \section{Implementacja rozszerzonej wersji metody PBAS}
 \label{sec:fpga_pbas_plus}
 
-Przedstawiona implementacja, powstała na podstawie opisu teoretycznego, zamieszczonego w rozdziale \ref{subsec:pbas_duchy}. Opisana tutaj, rozszerzona wersja algorytmu \textit{PBAS}, zawiera dodatkowy mechanizm rozróżniania obiektów statycznych od tzw. ,,duchów''. Koncepcja ta, wymaga także zaimplementowania metody indeksacji obiektów, co sprawia, że omawiany moduł jest najbardziej złożonym spośród wszystkich pokazanych w niniejszej pracy. Fragmenty przedstawionego tutaj rozwiązania pochodzą z publikacji \cite{kryjak_14_pbas}, również powstałej w Laboratorium Biocybernetyki AGH. Ogólny schemat przedstawiający architekturę modułu pokazano na rysunku \ref{fig:pbas_plus_diagram}. 
+Przedstawiona implementacja, powstała na podstawie opisu teoretycznego, zamieszczonego w rozdziale \ref{subsec:pbas_duchy}. 
+Opisana tutaj, rozszerzona wersja algorytmu \textit{PBAS}, zawiera dodatkowy mechanizm rozróżniania obiektów statycznych od tzw. ,,duchów''.
+Koncepcja ta wymaga także zaimplementowania metody indeksacji obiektów co sprawia, że omawiany moduł jest najbardziej złożonym spośród wszystkich pokazanych w niniejszej pracy. 
+Fragmenty przedstawionego tutaj rozwiązania pochodzą z publikacji \cite{kryjak_14_pbas}, również powstałej w Laboratorium Biocybernetyki AGH. Autorzy udostępnili kod źródłowy modułu wykonującego indeksację oraz detekcję obiektów statycznych. Został on zintegrowany z podstawową wersją metody opisaną w poprzednim rozdziale.
+%%TODO bardziej konkretnie co użyte, co przepisane, co zmodyfikwoane, przeprotowane itp...
+Ogólny schemat przedstawiający architekturę modułu pokazano na rysunku \ref{fig:pbas_plus_diagram}. 
 	
 	\begin{figure}[h!]
 		\centering
@@ -427,9 +668,24 @@ Przedstawiona implementacja, powstała na podstawie opisu teoretycznego, zamiesz
 		\label{fig:pbas_plus_diagram}
 	\end{figure}
 	
-Pierwszym istotnym elementem jest realizacja podstawowego algorytmu \textit{PBAS}, w stosunku do wersji przedstawione w rozdziale \ref{} musiał on zostać zmodyfikowany. Konieczne było dodanie obsługi sprzężenia zwrotnego zgodnie z równaniami (\ref{}) i (\ref{}). Oprócz tego należało także zapewnić aktualizację dwóch nowych parametrów $S(x_i)_{cnt}$ i $E(x_i)_{mean}$, zgodnie z równaniami (\ref{equ:pbas_s_cnt}) i (\ref{equ:pbas_ec_mean}). Dodatkowo w modelu tła musi znaleźć się też poprzednia wartość piksela ($24$ bity) wykorzystywana podczas odejmowania ramek (blok \textit{CFD}). W związku z tym, aby rozmiar modelu nie przekroczył maksymalnego rozmiaru wynoszącego $1024$ bity, konieczne było zredukowanie liczby próbek w algorytmie \textit{PBAS} do $18$. Parametr $S(x_i)_{cnt}$ zapisany jest jako 8 bitowa liczba całkowita, z kolei wartość $E(x_i)_{mean}$ to 16 bitowa liczba stałoprzecinkowa w formacie \textit{8z8u}. Ostatecznie rozmiar modelu tła w takiej konfiguracji wynosi: $3 \cdot (18 \cdot (8+8) + 16 + 16) + 8 + 16 + 24 = 1008$ bitów.
+Pierwszym istotnym elementem jest realizacja podstawowego algorytmu \textit{PBAS}, w stosunku do wersji przedstawione w rozdziale \ref{sec:fpga_pbas} musiał on zostać zmodyfikowany. 
+%% brak ref
+Konieczne było dodanie obsługi sprzężenia zwrotnego zgodnie z równaniami (\ref{equ:pbas_stability}) i (\ref{equ:pbas_edge_coef}). 
+%%TODO brak odnośników
+Oprócz tego należało także zapewnić aktualizację dwóch nowych parametrów $S(x_i)_{cnt}$ i $E(x_i)_{mean}$, zgodnie z równaniami (\ref{equ:pbas_s_cnt}) i (\ref{equ:pbas_ec_mean}). 
+Dodatkowo w modelu tła musi znaleźć się też poprzednia wartość piksela ($24$ bity) wykorzystywana podczas odejmowania ramek (blok \textit{CFD}). 
+W~związku z tym, aby rozmiar modelu nie przekroczył maksymalnego rozmiaru wynoszącego $1024$ bity, konieczne było zredukowanie liczby próbek w algorytmie \textit{PBAS} do $18$. 
+Parametr $S(x_i)_{cnt}$ zapisany jest jako 8 bitowa liczba całkowita, z kolei wartość $E(x_i)_{mean}$ to 16 bitowa liczba stałoprzecinkowa w formacie \textit{8z8u}. 
+Ostatecznie rozmiar modelu tła w takiej konfiguracji wynosi: $3 \cdot (18 \cdot (8+8) + 16 + 16) + 8 + 16 + 24 = 1008$ bitów.
 
-Równolegle do algorytmu \textit{PBAS} wykonywane jest, wspomniane wcześniej, odejmowanie ramek oraz detekcja krawędzi metodą Sobela. Na maskę wyjściową podobnie jak w poprzednich metodach, nakładany jest filtr medianowy. Wyznaczane są także krawędzie na masce binarnej, gdyż jest to niezbędne podczas przeprowadzania analizy poszczególnych obiektów. Schemat bloku \textit{CCA}, odpowiedzialnego za to zadanie, został pokazany na rysunku \ref{fig:cca_diagram}. Ze względu ma fakt, że dane z modułu analizy obiektów dostępne są dopiero po przetworzeniu całej ramki obrazu, konieczne jest zapewnienie odpowiedniej synchronizacji sygnałów sprzężenia zwrotnego z modułem  \textit{PBAS}. Zadanie to zostało zrealizowane poprzez blok \textit{feedback\_ctrl}. Wyznaczone wartości współczynników stabilności i podobieństwa krawędzi oraz finalna maska są zapisywane w pamięci \textit{BRAM}. Działający algorytm, poprawnie identyfikujący obiekt pierwszoplanowy oraz prostokąt go otaczający, został pokazany na rysunku \ref{fig:pbas_plus_demo}.
+Równolegle do algorytmu \textit{PBAS} wykonywane jest, wspomniane wcześniej, odejmowanie ramek oraz detekcja krawędzi metodą Sobela. 
+Na maskę wyjściową podobnie jak w poprzednich metodach, nakładany jest filtr medianowy. 
+Wyznaczane są także krawędzie na masce binarnej, gdyż jest to niezbędne podczas przeprowadzania analizy poszczególnych obiektów. 
+Schemat bloku \textit{CCA} odpowiedzialnego za to zadanie został pokazany na rysunku \ref{fig:cca_diagram}. 
+Ze względu ma fakt, że dane z modułu analizy obiektów dostępne są dopiero po przetworzeniu całej ramki obrazu, konieczne jest zapewnienie odpowiedniej synchronizacji sygnałów sprzężenia zwrotnego z modułem  \textit{PBAS}. 
+Zadanie to zostało zrealizowane poprzez blok \textit{feedback\_ctrl}. 
+Wyznaczone wartości współczynników stabilności i podobieństwa krawędzi oraz finalna maska są zapisywane w pamięci \textit{BRAM}. 
+Działający algorytm poprawnie identyfikujący obiekt pierwszoplanowy oraz prostokąt go otaczający został pokazany na rysunku \ref{fig:pbas_plus_demo}.
 
 	\begin{figure}[h!]
 		\centering
@@ -437,12 +693,27 @@ Równolegle do algorytmu \textit{PBAS} wykonywane jest, wspomniane wcześniej, o
 		\caption{Architektura modułu \textit{CCA} -- źródło \cite{kryjak_14_pbas}}
 		\label{fig:cca_diagram}
 	\end{figure}
+		%TODO to bym jednak przerobił na PL. Choćby w paint, zobaczę czy nie mam źródła.
 
-Do zrealizowania zadania indeksacji obiektów wykorzystano moduł \textit{CCA} opracowany w ramach publikacji \cite{kryjak_14_pbas}. Całość została przygotowana w oparciu o teorię na temat indeksowania obiektów, przedstawioną w rozdziale \ref{subsec:pbas_indeksacja}. Przygotowany moduł składa się z dwóch części, pierwszą z nich jest fragment logiki programowej (\textit{Labelling Block}), odpowiedzialny za przypisanie kolejnym pikselom odpowiednich etykiet. Jak zostało to opisane w części teoretycznej, etykieta jest dobierana na podstawie sąsiednich pikseli oraz etykiet im przypisanych. Konieczne jest zatem wygenerowanie kontekstu piksela wejściowego, zawierającego etykiety przypisane sąsiadom.
+Do zrealizowania zadania indeksacji obiektów wykorzystano moduł \textit{CCA} opracowany w ramach publikacji \cite{kryjak_14_pbas}. 
+Całość została przygotowana w oparciu o teorię na temat indeksowania obiektów, przedstawioną w rozdziale \ref{subsec:pbas_indeksacja}. 
+Moduł składa się z dwóch części, pierwszą z nich jest fragment logiki programowej (\textit{Labelling Block}), odpowiedzialny za przypisanie kolejnym pikselom odpowiednich etykiet. %%TODO powt. przygotowy
+Jak zostało to opisane w części teoretycznej, etykieta jest dobierana na podstawie sąsiednich pikseli oraz etykiet im przypisanych. 
+Konieczne jest zatem wygenerowanie kontekstu piksela wejściowego, zawierającego etykiety przypisane sąsiadom.
 
-Informacja o przydzielonej etykiecie przekazywana jest do czterech bloków obliczających pole zidentyfikowanego obiektu. Pierwszy licznik (\textit{segment area} służy do wyznaczenia całkowitego pola obiektu. Drugi moduł (\textit{movement area}) zlicza natomiast jedynie ruchome piksele. Wartości te są używane do wyznaczenia współczynnika $S_{O_k}$ zgodnie z równaniem \ref{equ:pbas_stability}, wykorzystano w tym celu dzielarkę sprzętową. Kolejny licznik (\textit{edge mask area}) służy do zliczania pikseli na pierwszoplanowej masce krawędzi. Ostatni z modułów (textit{edge image area}) wyznacza liczbę pikseli znajdujących się na wspomnianej wyżej masce oraz na zbinaryzowanym obrazie krawędzi obrazu wejściowego. Te dwie wartości służą do wyznaczenia parametru $EC_{O_k}$, zgodnie z równaniem \ref{equ:pbas_edge_coef}. Podobnie jak w poprzednim przypadku, tutaj także wykorzystano dzielarkę sprzętową.
+Informacja o przydzielonej etykiecie przekazywana jest do czterech bloków obliczających pole zidentyfikowanego obiektu. 
+Pierwszy licznik (\textit{segment area} służy do wyznaczenia całkowitego pola obiektu. 
+Drugi moduł (\textit{movement area}) zlicza natomiast jedynie ruchome piksele. 
+Wartości te są używane do wyznaczenia współczynnika $S_{O_k}$ zgodnie z równaniem \ref{equ:pbas_stability}. 
+Wykorzystano w tym celu dzielarkę sprzętową. 
+Kolejny licznik (\textit{edge mask area}) służy do zliczania pikseli na pierwszoplanowej masce krawędzi. 
+Ostatni z modułów (\textit{edge image area}) wyznacza liczbę pikseli znajdujących się na wspomnianej wyżej masce oraz na zbinaryzowanym obrazie krawędzi obrazu wejściowego. 
+Te dwie wartości służą do wyznaczenia parametru $EC_{O_k}$, zgodnie z równaniem \ref{equ:pbas_edge_coef}. 
+Podobnie jak w poprzednim przypadku, tutaj także wykorzystano dzielarkę sprzętową.
 
-Oprócz wymienionych czterech istnieje jeszcze jeden blok, aktualizujący na bieżąco parametry prostokąta otaczającego poszczególne obiekty. Wszystkie liczniki zostały zaimplementowane z użyciem pamięci blokowej \textit{BRAM}. Problem konfliktów rozwiązano, poprzez sumowanie wartości zapamiętanych dla obu łączonych obiektów i zapisanie jej jako nowej wartości dla obiektu o niższej etykiecie. Wartość zapisana pod adresem wyższej etykiety zostaje natomiast oznaczona jako nieważna.
+Oprócz wymienionych czterech istnieje jeszcze jeden blok, aktualizujący na bieżąco parametry prostokąta otaczającego poszczególne obiekty. Wszystkie liczniki zostały zaimplementowane z użyciem pamięci blokowej \textit{BRAM}. 
+Problem konfliktów rozwiązano poprzez sumowanie wartości zapamiętanych dla obu łączonych obiektów i zapisanie jej jako nowej wartości dla obiektu o niższej etykiecie. 
+Wartość zapisana pod adresem wyższej etykiety zostaje natomiast oznaczona jako nieważna.
 
 	\begin{figure}[h!]
 		\centering
@@ -452,7 +723,9 @@ Oprócz wymienionych czterech istnieje jeszcze jeden blok, aktualizujący na bie
 	\end{figure}
 
 
-Wykorzystanie zasobów przez rozszerzoną wersję algorytmu \textit{PBAS} przedstawiono w tabeli \ref{tab:pbas_plus_utilization}, oszacowany pobór mocy wynosi natomiast \num{5.087}W. Ze względu na mechanizm indeksacji, jest to najbardziej złożony ze wszystkich omawianych algorytmów, stąd też najwyższe zużycie zasobów jak i pobór mocy. W stosunku do standardowej metody \textit{PBAS} możemy zauważyć kilku procentowy wzrost dla większości typów. 
+Wykorzystanie zasobów przez rozszerzoną wersję algorytmu \textit{PBAS} przedstawiono w tabeli \ref{tab:pbas_plus_utilization}, oszacowany pobór mocy wynosi natomiast \num{5.087}W. 
+Ze względu na mechanizm indeksacji, jest to najbardziej złożony ze wszystkich omawianych algorytmów, stąd też najwyższe zużycie zasobów jak i pobór mocy. 
+W stosunku do standardowej metody \textit{PBAS} możemy zauważyć kilku procentowy wzrost dla większości typów zasobów. 
 
 	\begin{table}[h!]
 		\centering
@@ -490,7 +763,12 @@ Wykorzystanie zasobów przez rozszerzoną wersję algorytmu \textit{PBAS} przeds
 \section{Implementacja GMM}
 \label{sec:fpga_gmm}
 
-Przedstawiona tutaj implementacja algorytmu \textit{GMM} została przygotowana w ramach pracy inżynierskiej \cite{piszczek_15}. Sposób implementacji sprzętowej omawianej metody jest tematem niezwykle rozległym, w~niniejszym rozdziale przedstawiono jedynie ogólną idee przygotowanej architektury bez zagłębiania się w szczegóły implementacyjne. Schemat przedstawiający implementację i wykorzystane moduły został pokazany na rysunku \ref{fig:gmm_diagram}.
+Przedstawiona tutaj realizacja sprzętowa algorytmu \textit{GMM} została przygotowana w ramach pracy inżynierskiej \cite{piszczek_15}. 
+Sposób implementacji omawianej metody jest tematem niezwykle rozległym. 
+W~niniejszym rozdziale przedstawiono jedynie ogólną idee przygotowanej architektury bez zagłębiania się w szczegóły realizacji poszczególnych operacji w układzie reprogramowalnym. 
+%%TODO implementacja x3
+Schemat przedstawiający implementację i wykorzystane moduły został pokazany na rysunku \ref{fig:gmm_diagram}.
+%%TODO x4
 
 	\begin{figure}[h!]
 		\centering
@@ -499,11 +777,18 @@ Przedstawiona tutaj implementacja algorytmu \textit{GMM} została przygotowana w
 		\label{fig:gmm_diagram}
 	\end{figure}
 	
-Niewątpliwą zaletą, znacząco ułatwiającą implementację w układzie reprogramowalnym jest brak operacji kontekstowych. Dzięki temu możemy znacząco uprościć logikę programową i zredukować zużycie zasobów. Nawiązując do opisu teoretycznego zamieszczonego w rozdziale \ref{sec:gmm_teoria}, pierwszym krokiem algorytmu jest sortowanie rozkładów Gaussa według współczynnika $r_i = \frac{\omega_i}{\sigma_i}$. W tym celu wykorzystana została specjalnie zaprojektowana sieć sortująca, jest to najbardziej złożony element przedstawianej implementacji. 
+Niewątpliwą zaletą GMM, znacząco ułatwiającą implementację w układzie reprogramowalnym, jest brak operacji kontekstowych. 
+Dzięki temu możemy znacząco uprościć logikę programową i zredukować użycie zasobów logicznych. 
+Nawiązując do opisu teoretycznego zamieszczonego w rozdziale \ref{sec:gmm_teoria}, pierwszym krokiem algorytmu jest sortowanie rozkładów Gaussa według współczynnika $r_i = \frac{\omega_i}{\sigma_i}$. 
+W tym celu wykorzystana została specjalnie zaprojektowana sieć sortująca, jest to najbardziej złożony element przedstawianej implementacji. 
 
-Po dokonaniu sortowania, poszczególne rozkłady Gaussa są klasyfikowane, na podstawie równania \ref{equ:gmm_b}. Następnie przeprowadzany jest test dopasowania i ostateczna klasyfikacja piksela, zgodnie z~równaniem \ref{equ:gmm_mahalanobis}. Po dokonaniu klasyfikacji rozkłady Gaussa są aktualizowane i zapisywane w pamięci \textit{RAM}.
+Po dokonaniu sortowania, poszczególne rozkłady Gaussa są klasyfikowane, na podstawie równania \ref{equ:gmm_b}. 
+Następnie przeprowadzany jest test dopasowania i ostateczna klasyfikacja piksela, zgodnie z~równaniem \ref{equ:gmm_mahalanobis}. 
+Po dokonaniu klasyfikacji rozkłady Gaussa są aktualizowane i zapisywane w pamięci \textit{RAM}.
 
-Przygotowana implementacja przetwarza obraz we wszystkich wymaganych rozdzielczościach, czyli \textit{576p}, \textit{720p} i \textit{1080p} w 50 klatkach na sekundę. Dla obrazu \textit{720x576} przyjęto $K=5$ rozkładów Gaussa w~każdym modelu, natomiast dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, liczba rozkładów wynosi $K=3$. W modelu tła pojedynczy rozkład Gaussa ma rozmiar $68$ bitów, dokładny opis i reprezentacja poszczególnych bitów modelu została przedstawiona w tabeli \ref{tab:gmm_ram_model}.
+Przygotowana implementacja przetwarza obraz we wszystkich wymaganych rozdzielczościach, czyli \textit{576p}, \textit{720p} i \textit{1080p} dla 50 klatek na sekundę. 
+Dla obrazu \textit{720x576} przyjęto $K=5$ rozkładów Gaussa w~każdym modelu, natomiast dla wyższych rozdzielczości, ze względu na ograniczenia pamięci \textit{RAM}, liczba rozkładów wynosi $K=3$. 
+W modelu tła pojedynczy rozkład Gaussa ma rozmiar $68$ bitów, dokładny opis i reprezentacja poszczególnych bitów modelu została przedstawiona w tabeli \ref{tab:gmm_ram_model}.
 
 	\begin{table}[h]
 		\centering
@@ -533,7 +818,14 @@ Przygotowana implementacja przetwarza obraz we wszystkich wymaganych rozdzielczo
 		\end{threeparttable}
 	\end{table}
 
-Poglądowy schemat przedstawiający zasadę działania sieci sortującej dla $K=5$ elementów, został pokazany na rysunku \ref{fig:gmm_sort}. Jest to sprzętowa realizacja algorytmu \textit{BS} (ang. \textit{Bubble Sort} -- sortowanie bąbelkowe). Pionowe linie oznaczają, porównania między elementami. Przerywane linie z grotem określają z kolei kierunek przesuwania się najmniejszego elementu w danej iteracji. W pierwszym kroku spośród $K$ elementów, wyłaniany jest najmniejszy poprzez wykonanie $K-1$ porównań. Wyznaczony w ten sposób element jest przestawiany na sam dół sieci. Następnie wśród pozostałych $K-1$ elementów wyszukiwany jest kolejny najmniejszy, w tym przypadku należy wykonać $K-2$ porównania itd. Ostatecznie do otrzymania posortowanego ciągu potrzeba $K-1$ iteracji algorytmu.  
+Poglądowy schemat przedstawiający zasadę działania sieci sortującej dla $K=5$ elementów, został pokazany na rysunku \ref{fig:gmm_sort}. 
+Jest to sprzętowa realizacja algorytmu \textit{BS} (ang. \textit{Bubble Sort} -- sortowanie bąbelkowe). 
+Pionowe linie oznaczają, porównania między elementami. 
+Przerywane linie z grotem określają z kolei kierunek przesuwania się najmniejszego elementu w danej iteracji. 
+W pierwszym kroku spośród $K$ elementów, wyłaniany jest najmniejszy poprzez wykonanie $K-1$ porównań. 
+Wyznaczony w ten sposób element jest przestawiany na sam dół sieci. 
+Następnie wśród pozostałych $K-1$ elementów wyszukiwany jest kolejny najmniejszy, w tym przypadku należy wykonać $K-2$ porównania itd. 
+Ostatecznie do otrzymania posortowanego ciągu potrzeba $K-1$ iteracji algorytmu.  
 	
 	\begin{figure}[h!]
 		\centering
@@ -543,7 +835,12 @@ Poglądowy schemat przedstawiający zasadę działania sieci sortującej dla $K=
 	\end{figure}	
 
 
-Tabela \ref{tab:gmm_utilization} przedstawia wykorzystanie zasobów w układzie \textit{FPGA} przez algorytm \textit{GMM}. Zaimplementowana metoda, w odróżnieniu od innych, nie zawiera operacji kontekstowych (poza filtrem medianowym nakładanym na maskę wyjściową), w związku z tym nie jest wykorzystywana pamięć \textit{BRAM}. W przypadku pozostałych zasobów kluczowy jest parametr $K$ reprezentujący liczbę rozkładów Gaussa. Dla $K=5$, czyli domyślnej wartości wykorzystanie zasobów jest zdecydowanie niższe niż w przypadku algorytmów \textit{ViBE} i \textit{PBAS}, co niestety przekłada się również na efekt końcowy. Testy poszczególnych algorytmów zostały szczegółowo przedstawione w rozdziale \ref{cha:ewaluacja}.
+Tabela \ref{tab:gmm_utilization} przedstawia wykorzystanie zasobów w układzie \textit{FPGA} przez algorytm \textit{GMM}. 
+Zaimplementowana metoda, w odróżnieniu od innych, nie zawiera operacji kontekstowych (poza filtrem medianowym nakładanym na maskę wyjściową). W~związku z tym nie jest wykorzystywana pamięć \textit{BRAM}. 
+W przypadku pozostałych zasobów kluczowy jest parametr $K$ reprezentujący liczbę rozkładów Gaussa. 
+Dla $K=5$, czyli domyślnej wartości wykorzystanie zasobów jest zdecydowanie niższe niż w przypadku algorytmów \textit{ViBE} i \textit{PBAS}, co niestety przekłada się również na dokładność metody. 
+%%TODO dziwnie to brzmi -> raczej w duchu, że oszczędność kosztem dokładności.
+Testy poszczególnych algorytmów zostały szczegółowo przedstawione w rozdziale \ref{cha:ewaluacja}.
 
 	\begin{table}[h!]
 		\centering
@@ -577,5 +874,8 @@ Tabela \ref{tab:gmm_utilization} przedstawia wykorzystanie zasobów w układzie 
 		\end{threeparttable}
 	\end{table}
 
-%\section{Podsumowanie}
-%\label{sec:implementacja_posumowanie}
+%TODO tu na samym końcu przydałoby się porónanie w jakieś wspólnej tabelce wszystkich parametrów i wariantów, rozdzielczości oraz ocena.
+
+\section{Podsumowanie}
+\label{sec:implementacja_posumowanie}
+

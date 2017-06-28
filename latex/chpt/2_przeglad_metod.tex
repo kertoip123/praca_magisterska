@@ -4,43 +4,128 @@
 \section{Wprowadzenie}
 \label{sec:przeglad_wprowadzenie}
 
-Niniejszy rozdział ma na celu przedstawić dotychczasowe osiągnięcia w dziedzinie segmentacji obiektów pierwszoplanowych. Ponieważ jest to zagadnienie bardzo rozległe, położono nacisk głównie na najpopularniejsze podejścia, osiągające zadowalające rezultaty w różnego rodzaju testach weryfikacyjnych. Omówiono zarówno algorytmy opracowane w~ramach prac dyplomowych oraz artykułów w~Laboratorium Biocybernetyki AGH jak i~inne metody opublikowane podczas konferencji naukowych na całym świecie. 
+Niniejszy rozdział ma na celu przedstawić dotychczasowe osiągnięcia w dziedzinie segmentacji obiektów pierwszoplanowych. 
+Ponieważ jest to zagadnienie bardzo rozległe, położono nacisk głównie na najpopularniejsze podejścia, osiągające zadowalające rezultaty w różnego rodzaju testach weryfikacyjnych. 
+Omówiono zarówno algorytmy opracowane w~ramach prac dyplomowych oraz artykułów w~Laboratorium Biocybernetyki AGH jak i~inne metody opublikowane podczas konferencji naukowych na całym świecie. 
 
-Główny nacisk położono na pokazanie różnych podejść do tworzenia zaawansowanych modeli tła, wykorzystywanego następnie do klasyfikacji pikseli znajdujących się na kolejnych ramkach obrazu. Niezależnie od samego sposobu modelowania tła, istotnym zagadnieniem jest także sposób jego aktualizacji. Różne podejścia do tematu aktualizacji używanego modelu również zostały przedstawione w niniejszym rozdziale. Kolejnym elementem wartym zaznaczenia, są różnego rodzaju dodatkowe funkcjonalności wspierające podstawową wersję algorytmu. Może to być, na przykład moduł do wykrywania obiektów statycznych, bądź też mechanizm eliminujący drgania kamery.
+Główny nacisk położono na pokazanie różnych podejść do tworzenia zaawansowanych modeli tła, wykorzystywanego następnie do klasyfikacji pikseli znajdujących się na kolejnych ramkach obrazu. 
+Niezależnie od samego sposobu modelowania tła, istotnym zagadnieniem jest także sposób jego aktualizacji. 
+Różne podejścia do tematu aktualizacji używanego modelu również zostały przedstawione w niniejszym rozdziale. 
+Kolejnym elementem wartym zaznaczenia, są różnego rodzaju dodatkowe funkcjonalności wspierające podstawową wersję algorytmu. 
+Może to być, na przykład moduł do wykrywania obiektów statycznych, bądź też mechanizm eliminujący drgania kamery.
 
+%%TODO ten podział mi się nie podoba. O ile PBAS i VIBE mozna uznac, że w oparciu o powiedzmy obserwacje wartosci. o tyle ta srednia to jednak jakiś parametr statystyczny i blizej do GMM...
 
 \section{Model tła bazujący na poprzednich ramkach}
 \label{sec:model_poprzednie_ramki}
 
-Pierwszym typem algorytmów, są metody bazujące na poprzednich ramkach obrazu. Jednym z najprostszych tego typu algorytmów jest tzw. ,,średnia krocząca''. Metoda ta została zrealizowana w niniejszej pracy, opis teoretyczny zamieszczono w rozdziale \ref{sec:proste_metody}. Do tego typu algorytmów możemy zaliczyć także prostą metodę odejmowania ramek oraz porównywanie aktualnej ramki z modelem referencyjnym. Obie te metody zaprezentowano w przytoczonym wyżej rozdziale.
+Pierwszym typem metod, są algorytmy bazujące na poprzednich ramkach obrazu. Niewątpliwie jedną z bardziej popularnych tego typu metod jest \textit{ViBE} (\textit{Visual Background Extractor}). 
+Algorytm został opisany w wielu publikacjach, między innymi w \cite{barnich_11, droogenbroeck_12}, doczekał się także wielu usprawnień.
+Oprócz zagranicznych publikacji metoda ta, była również obiektem badań w Laboratorium Biocybernetyki AGH, gdzie dokonano jej implementacji w układzie reprogramowalnym \cite{kryjak_13_vibe}. 
+Oprócz standardowej wersji opracowano także rozszerzoną odmianę algorytmu, posiadającą dodatkowy mechanizm eliminacji efektów drgającej kamery \cite{kryjak_14_vibe}. 
+Metoda ta została również zawarta w niniejszej pracy, jej szczegółowy opis przedstawiono w rozdziale \ref{sec:vibe_teoria}.
 
-Spośród zaawansowanych algorytmów, których model opiera się na poprzednich ramkach, niewątpliwie jedną z bardziej popularnych metody jest \textit{ViBE} (\textit{Visual Background Extractor}). Algorytm został opisany w wielu publikacjach, między innymi w \cite{barnich_11, droogenbroeck_12}, doczekał się także wielu usprawnień. Oprócz zagranicznych publikacji metoda ta, była również obiektem badań w Laboratorium Biocybernetyki AGH, gdzie dokonano jej implementacji w układzie reprogramowalnym \cite{kryjak_13_vibe}. Oprócz standardowej wersji opracowano także rozszerzoną odmianę algorytmu, posiadającą dodatkowy mechanizm eliminacji efektów drgającej kamery \cite{kryjak_14_vibe}. Metoda ta została również zawarta w niniejszej pracy, jej szczegółowy opis przedstawiono w rozdziale \ref{sec:vibe_teoria}.
-
-Kolejnym algorytmem bazującym na poprzednich ramkach obrazu jest \textit{PBAS} (\textit{Pixel Based Adaptive Segmenter}). Metoda została zaprezentowana między innymi w \cite{hofmann_12}. W ramach badań w Laboratorium Biocybernetyki AGH opracowano implementację sprzętową tego algorytmu \cite{kryjak_13_pbas}. Dodatkowo udało się dodać do podstawowej wersji algorytmu dodatkowych mechanizm zapewniający lepszą detekcję obiektów statycznych \cite{kryjak_14_pbas}. Ulepszona wersja również została zaimplementowana w układzie \textit{FPGA}. Omawiany algorytm również jest elementem badań niniejszej pracy, a jego dokładny opis teoretyczny zamieszczono w rozdziale \ref{sec:pbas_teoria}.
+Kolejnym algorytmem bazującym na poprzednich ramkach obrazu jest \textit{PBAS} (\textit{Pixel Based Adaptive Segmenter}). 
+Metoda została zaprezentowana między innymi w \cite{hofmann_12}. 
+W ramach badań w Laboratorium Biocybernetyki AGH opracowano implementację sprzętową tego algorytmu \cite{kryjak_13_pbas}. 
+Udało się również dodać do podstawowej wersji algorytmu dodatkowy mechanizm zapewniający lepszą detekcję obiektów statycznych \cite{kryjak_14_pbas}. %%TODO dodatkowo dodatkowy...
+Ulepszona wersja również została zaimplementowana w układzie \textit{FPGA}. 
+Omawiany algorytm również jest elementem badań niniejszej pracy, a jego dokładny opis teoretyczny zamieszczono w rozdziale \ref{sec:pbas_teoria}.
 
 \section{Inne rodzaje modeli tła}
 \label{sec:model_inne}
 
-Drugą grupą algorytmów, są metody bazujące w większym stopniu na modelach statystycznych. Pierwszą, najprawdopodobniej najpopularniejszą metodą tego rodzaju jest algorytm \textit{GMM} (\textit{Gaussian Mixture Models}). Głównym założeniem tej metody jest reprezentacja modelu tła poprzez rozkłady Gaussa. Algorytm po raz pierwszy został opisany w 1999 roku w publikacji \cite{Stauffer_Grimson_99}. Powstały również publikacje przedstawiające implementację tej metody w układzie reprogramowalnym \cite{Genovese_Napoli_13}. Algorytm, był także przedmiotem badań prac dyplomowych w Laboratorium Biocybernetyki AGH \cite{piszczek_15, janus_15}. Przygotowana w ramach pracy dyplomowej \cite{piszczek_15} implementacja sprzętowa została również przeanalizowana w niniejszej pracy. Szczegółowy opis algorytmu zamieszczono w rozdziale \ref{sec:gmm_teoria}.
+Drugą grupą algorytmów, są metody bazujące w większym stopniu na modelach statystycznych. Jednym z najprostszych tego typu algorytmów jest tzw. ,,średnia krocząca''. Metoda ta została zrealizowana w niniejszej pracy, opis teoretyczny zamieszczono w rozdziale \ref{sec:proste_metody}. Do tego typu algorytmów możemy zaliczyć także prostą metodę odejmowania ramek oraz porównywanie aktualnej ramki z modelem referencyjnym. Obie te metody zaprezentowano w przytoczonym wyżej rozdziale.
+ 
+Spośród zaawansowanych metod, najprawdopodobniej najpopularniejszą z tego rodzaju jest algorytm \textit{GMM} (\textit{Gaussian Mixture Models}). 
+Głównym założeniem tej metody jest reprezentacja modelu tła poprzez rozkłady Gaussa. 
+Algorytm po raz pierwszy został opisany w 1999 roku w publikacji \cite{Stauffer_Grimson_99}. 
+Powstały również publikacje przedstawiające implementację tej metody w układzie reprogramowalnym \cite{Genovese_Napoli_13}. 
+Algorytm, był także przedmiotem badań prac dyplomowych w Laboratorium Biocybernetyki AGH \cite{piszczek_15, janus_15}. 
+Przygotowana w ramach pracy dyplomowej \cite{piszczek_15} implementacja sprzętowa została również przeanalizowana w niniejszej pracy.
+Szczegółowy opis algorytmu zamieszczono w rozdziale \ref{sec:gmm_teoria}.
 
-Kolejnym algorytmem przedstawiającym nieco odmienne podejście jest metoda \textit{Flux Tensor}. Jest to algorytm bazujący na wykrywaniu krawędzi obiektu i badaniu pochodnej obrazu po czasie w celu wykrycia obiektów ruchomych, niestety przy jej użyciu nie ma możliwości detekcji obiektów statycznych. Od strony teoretycznej, metoda została przestawiona między innymi w publikacji \cite{palaniappan_11}, natomiast pierwsza implementacja sprzętowa została opracowana w Laboratorium Biocybernetyki AGH i przedstawiona na konferencji \textit{ICCVG} (\textit{International Conference on Computer Vision and Graphics}) \cite{janus_15, janus_16_flux}. 
+Kolejnym algorytmem przedstawiającym nieco odmienne podejście jest metoda \textit{Flux Tensor}. 
+Jest to algorytm bazujący na wykrywaniu krawędzi obiektu i badaniu pochodnej obrazu po czasie w celu wykrycia obiektów ruchomych -- niestety przy jej użyciu nie ma możliwości detekcji obiektów statycznych. 
+Od strony teoretycznej, metoda została omówiona między innymi w publikacji \cite{palaniappan_11}, natomiast pierwsza implementacja sprzętowa została opracowana w Laboratorium Biocybernetyki AGH i przedstawiona na konferencji \textit{ICCVG} (\textit{International Conference on Computer Vision and Graphics}) \cite{janus_15, janus_16_flux}. %%TODO x2 przedstawiona
 
-Bardzo ciekawe podejście do zagadnienia segmentacji obiektów zostało przedstawione w publikacji \cite{wang_14}. Pokazany algorytm \textit{FTSG} (\textit{Flux Tensor with Split Gaussian models}) jest metodą hybrydową wykorzystującą omówione wcześniej metody \textit{GMM} i \textit{Flux Tensor} oraz dodatkowe mechanizm detekcji dynamicznego tła i obiektów statycznych. Algorytm w momencie publikacji był najdokładniejszą metodą w rankingu \textit{ChangeDetection} \cite{change_detection_web}. Metoda ta, została częściowo zaimplementowana w układzie reprogramowalnym w ramach jednej z pracy dyplomowych w Laboratorium Biocybernetyki AGH \cite{janus_15}.
+Bardzo ciekawe podejście do zagadnienia segmentacji obiektów zostało przedstawione w publikacji \cite{wang_14}. 
+Pokazany algorytm \textit{FTSG} (\textit{Flux Tensor with Split Gaussian models}) jest metodą hybrydową wykorzystującą omówione wcześniej metody \textit{GMM} i \textit{Flux Tensor} oraz dodatkowy mechanizm detekcji dynamicznego tła i obiektów statycznych. 
+Algorytm w momencie publikacji był najdokładniejszą metodą w rankingu \textit{ChangeDetection} \cite{change_detection_web}. 
+Metoda ta, została częściowo zaimplementowana w układzie reprogramowalnym w ramach jednej z pracy dyplomowych w Laboratorium Biocybernetyki AGH \cite{janus_15}.
 
-Do grupy metod statystycznych można zaliczć także algorytm \textit{KDE} (\textit{nonparametric Kernel Density Estimation}). Metoda została po raz pierwszy opublikowana w 2002 roku \cite{elgammal_02}. Rezultaty, które można uzyskać w testach przy jej wykorzystaniu nadal są satysfakcjonujące przez co często jest cytowana w~różnego rodzaju publikacjach i służy jako punkt odniesienia do nowych algorytmów. Idea metody opiera się na funkcji gęstości prawdopobieństwa, która jest używana do stworzenia modeli statystycznych tła i~pierwszego planu. Podobnie jak w przypadku pozostałych algorytmów, ta metoda również doczekała się wielu rozszerzeń i usprawnień \cite{nonaka_12}.
+Do grupy metod statystycznych można zaliczć także algorytm \textit{KDE} (\textit{nonparametric Kernel Density Estimation}). 
+Metoda została po raz pierwszy opublikowana w 2002 roku \cite{elgammal_02}. 
+Rezultaty, które można uzyskać w testach przy jej wykorzystaniu nadal są satysfakcjonujące przez co często jest cytowana w~różnego rodzaju publikacjach i służy jako punkt odniesienia do nowych algorytmów. 
+Idea metody opiera się na funkcji gęstości prawdopobieństwa, która jest używana do stworzenia modeli statystycznych tła i~pierwszego planu. 
+Podobnie jak w przypadku pozostałych algorytmów, ta metoda również doczekała się wielu rozszerzeń i usprawnień \cite{nonaka_12}.
 
 \section{Różne podejścia do aktualizacji modelu tła}
 \label{sec:model_tla_aktualizacja}
 
-W przypadku większości algorytmów wykorzystujących zaawansowany model tła, pojawia się zagadnienie aktualizacji modelu. Temat ten, został poruszony w większości publikacji przytoczonych w~rozdziałach \ref{sec:model_poprzednie_ramki} i \ref{sec:model_inne}. Autorzy zazwyczaj rozróżniają dwa rodzaje podejść do aktualizacji modelu: liberalne (ang. \textit{liberal approach}) oraz podejście konserwatywne (ang. \textit{conservative approach}). Podejście liberalne zakłada aktualizację wszystkich modeli, podczas gdy konserwatywne jedynie tych pikseli, które zostały sklasyfikowane jako tło. Obie metody mają oczywiście swoje wady i zalety.
+W przypadku większości algorytmów wykorzystujących zaawansowany model tła, pojawia się zagadnienie aktualizacji modelu. 
+Temat ten został poruszony w większości publikacji przytoczonych w~rozdziałach \ref{sec:model_poprzednie_ramki} i \ref{sec:model_inne}.
+Autorzy zazwyczaj rozróżniają dwa rodzaje podejść do aktualizacji modelu: liberalne (ang. \textit{liberal approach}) oraz podejście konserwatywne (ang. \textit{conservative approach}). 
+Podejście liberalne zakłada aktualizację wszystkich pikseli, podczas gdy konserwatywne jedynie tych, które zostały sklasyfikowane jako tło. 
+Obie metody mają oczywiście swoje wady i zalety.
 
-Główną wadą podejścia liberalnego jest stosunkowo szybkie wtapianie się obiektów pierwszoplanowych do modelu tła. Zjawisko to, jest szczególnie widoczne w przypadku wolno poruszających się obiektów. Polityka konserwatywnego aktualizowania modelu eliminuje ten problem, jednak ma inną poważną wadę. Podejście to, może prowadzić do omówionego już, wystąpienia tzw. ,,duchów'', czyli błędnej interpretacji odsłoniętego tła. Tego typu przypadek, może wystąpić w przypadku gdy obiekt pierwszoplanowy, początkowo statyczny (np. samochód stojący na światłach), zaczyna się porusząć. W~takiej sytuacji algorytm może nadal interpretować pozostawiony po samochodzie obszar jako element pierwszego planu. Kolejnym problemem są również różnego rodzaju zakłócenia i szumy, raz błędnie sklasyfikowany obszar może pozostać już nienaprawiony.
+Główną wadą podejścia liberalnego jest stosunkowo szybkie wtapianie się obiektów pierwszoplanowych do modelu tła. 
+Zjawisko to, jest szczególnie widoczne w przypadku wolno poruszających się obiektów. 
+%TODO opisać jeszcze smużenie...
+Polityka konserwatywnego aktualizowania modelu eliminuje ten problem, jednak ma inną poważną wadę. 
+Podejście to, może prowadzić do omówionego już, wystąpienia tzw. ,,duchów'', czyli błędnej interpretacji odsłoniętego tła. 
+Tego typu przypadek, może wystąpić w przypadku gdy obiekt pierwszoplanowy, początkowo statyczny (np. samochód stojący na światłach), zaczyna się poruszać. 
+W~takiej sytuacji algorytm może nadal interpretować obszar, w którym stał samochód, jako element pierwszego planu. 
+%%TODO pozostawiony - niezręczne
+Kolejnym problemem są również różnego rodzaju zakłócenia i szumy -- raz błędnie sklasyfikowany obszar może pozostać już nienaprawiony.
 
-Po analizie wspomnianych publikacji można zauważyć, że pomimo poważnych wad, częściej stosowanym podejściem jest polityka konserwatywna. Wykorzystywane są również dodatkowe mechanizm pomagające eliminować wspomniane problemy. Przykładem może być niezależna aktualizacja pikseli sąsiadujących z aktualnie aktualizowanym jak ma to miejsce w algorytmach \textit{ViBE} \cite{kryjak_13_vibe} lub \textit{PBAS} \cite{kryjak_13_pbas}. Innym rozwiązaniem jest osobny moduł do całkowitej eliminacji zjawiska ,,duchów'', takie podejście zrealizowano między innymi w rozszerzonym algorytmie \textit{PBAS} \cite{kryjak_14_pbas} oraz \textit{FTSG} \cite{wang_14}.
+Po analizie wspomnianych publikacji można zauważyć, że pomimo poważnych wad, częściej stosowanym podejściem jest polityka konserwatywna. Wykorzystywane są również dodatkowe mechanizm pomagające eliminować wspomniane problemy. 
+Przykładem może być niezależna aktualizacja pikseli sąsiadujących z aktualnie aktualizowanym jak ma to miejsce w algorytmach \textit{ViBE} \cite{kryjak_13_vibe} lub \textit{PBAS} \cite{kryjak_13_pbas}. 
+Innym rozwiązaniem jest osobny moduł do całkowitej eliminacji zjawiska ,,duchów'', takie podejście zrealizowano między innymi w rozszerzonym algorytmie \textit{PBAS} \cite{kryjak_14_pbas} oraz \textit{FTSG} \cite{wang_14}.
+
+\section{Mapa głębi obrazu -- RGB-D}
+\label{sec:rgbd}
+
+Autorzy publikacji \cite{hoffman_16_rbgd} przedstawili inne, bardzo ciekawe i niestandardowe podejście do segmentacji obiektów pierwszoplanowych. Zaprezentowany algorytm zakłada wykorzystanie sieci \textit{CNN} (ang.~\textit{convolutional neural network} -- konwolucyjne sieci neuronowe). Do uczenia sieci wykorzystywany jest, oprócz annotowanych danych uczących, także czujnik \textit{RGB--D}, czyli urządzenie generujące obraz wraz z mapami głębi. 
+
+Oczywiście istnieje wiele metod segmentacji obiektów pierwszoplanowych, wykorzystujących sieci nieuronowe, w tym przypadku autorzy skupili się na usprawnieniu procesu uczenia. Standardowo w tego typu algorytmach, sieć uczona jest na podstawie annotowanych obrazów w przestrzeni \textit{RGB}. Zbiory testowe można podzielić na wiele kategorii, jednak uzyskany w ten sposób dokładność detekcji nie zawsze jest zadowalająca. W związku z tym autorzy przedstawili hybrydowy system, w którym równolegle uczone są dwie sieci. Pierwsza z nich wykorzystuje standardowy zbiór obrazów zapisanych w przestrzeni \textit{RGB}, natomiast w drugiej sieci wykorzystywana jest mapa głębi tego obrazu.
+
+Głównym problemem w tego typu podejściu jest brak wystarczająco rozbudowanych zbiorów uczących, wykorzystujących mapy głębi obrazu, ich liczba jest wyraźnie kilkukrotnie mniejsza niż standardowych zbiorów \textit{RGB}. Autorzy zaproponowali podejście, w którym kluczową rolę odgrywa wymiana informacji pomiędzy obiema sieciami \textit{CNN} w trakcie procesu uczenia. Dzięki takiemu podejściu można dużo efektywniej przeprowadzić proces uczenia obu sieci i następie połączyć je w jedną. Testy wykonane przez autorów wykazał poprawę o około \num{21}\% w stosunku do standardowego podejścia.
+
+
+
+\section{Algorytm detekcji wykorzystujący histogramy blokowe}
+\label{sec:hog_svn}
+
+Innym ciekawym podejściem do detekcji obiektów jest algorytm wykorzystujący \textit{HOG} (ang. \textit{Histogram of Oriented Gradients} -- histogram zorientowanych gradientów). Implementacja sprzętowa została opracowana w Laboratorium Biocybernetyki AGH między innymi w ramach pracy dyplomowej \cite{kotarba_15}. W~tym celu wykorzystano hybrydowy układ \textit{Zynq} łączący w sobie procesor o architekturze \textit{ARM} z~\textit{FPGA}. Zastosowaniem stworzonego systemu wizyjnego była detekcja sylwetek ludzkich. W niniejszym podrozdziale przedstawiono w skróconej wersji główne założenia i koncepcję tego algorytmu.
+
+Metoda opiera się na połączeniu wspomnianych wcześniej histogramów zorientowanych gradientów i maszyny wektorów nośnych \textit{SVM} (ang. \textit{Suport Vector Machine}). Pierwszym krokiem jest podzielenie obrazu na komórki (zazwyczaj o rozmiarze $8x8$ pikseli). Histogram zostaje wyznaczony poprzez zliczanie gradientów wyliczonych w danej komórce. Komórki po raz kolejny grupowane są w większe bloki wewnątrz których następuje normalizacja. Taki zabieg ma na celu niwelację kontrastów pomiędzy blokami. Po znormalizowaniu wszystkich bloków tworzony jest ostateczny wektor cech.
+
+Kolejny etap to klasyfikacja, jest ona dokonywana na podstawie maszyny wektorów nośnych \textit{SVM}. Sam proces polega na wyszukiwaniu hiperpłaszczyzny, która najlepiej oddziela punkty z różnych klas. Punty położone najbliżej wspomnianej hiperpłaszczyzny nazywane są wektorami nośnymi. Niezwykle istotnym elementem jest funkcja jądra, służąca do przekształcenia przestrzeni cech do przestrzeni o~większej liczbie wymiarów. Do tego celu wykorzystywane są głównie funkcje wielomianowe jak i~\textit{RBF} (ang.~\textit{Radial Basis Function} -- radialna funkcja bazowa). Sam proces klasyfikacji jest stosunkowo szybki, jednak dużo istotniejszy jest proces uczenia klasyfikatora. Bardzo istotna w tym przypadku jest wybrana funkcja jądra. 
+
+Algorytm musi posiadać możliwość detekcji obiektów o różnych rozmiarach, ostatnim elementem jest zatem dodatkowy generator przeskalowujący obraz wejściowy do różnych rozmiarów. Jego dokładna koncepcja jest dość złożona, w pierwszej kolejności wykonywana jest operacja rozmycia. Jest to standardowy zabieg w wielu metodach, mający na celu eliminację części zakłóceń i szumów. Następnie wykonywane jest właściwe skalowanie obrazu, piksel wynikowy wyznaczany jest zawsze na podstawie czterech sąsiadów. Należy zaznaczyć, że obraz w nowej skali wymaga nowych, własnych klasyfikatorów \textit{SVM}.
+
+
+\section{Mechanizm detekcji cieni}
+\label{sec:cienie}
+
+W Laboratorium Biocybernetyki AGH, opracowano również algorytm zawierający dedykowany mechanizm detekcji cieni. Całość od strony teoretycznej jak i implementacji sprzętowej została opisana w~publikacji \cite{kryjak_11_shadows}. Metoda została opracowana na bazie algorytmu klasteryzacji, którego opis można znaleźć między innymi w publikacji \cite{butler_03}. Przedstawiona podejście jest bardzo podobne do wspomnianego już algorytmu \textit{GMM}. W tym przypadku model tła składa się z klastrów, inicjalizowanych wartościami piksela. Następnie przeprowadzany jest test dopasowania do poszczególny klastrów i na tej podstawie dokonywana jest ostateczna klasyfikacja oraz decyzja odnośnie aktualizacji modelu.
+
+Najistotniejszym elementem metody jest mechanizm detekcji cieni. Jego działanie opiera się na założeniu, że cień nie zmienia ani koloru ani tekstury elementu na który pada. Jedyny parametr który ulega modyfikacji to jasność, co również nie zawsze jest prawdziwe, głównie w warunkach silnego oświetlenia. W algorytmie wykorzystano deskryptor teksturowy \textit{SILTP}, opisany szerzej w publikacji \cite{qin_10}. Jego rolą jest w tym przypadku poprawa dokładności segmentacji obiektów ruchomych. Detekcja przeprowadzana jest w przestrzeni barw \textit{YCbCr} oraz \textit{CIELab}, ponieważ to właśnie z ich składowych najłatwiej wyodrębnić cechy charakteryzujące cienie.
+
+Autorzy publikacji \cite{kryjak_11_shadows} opisali również implementację sprzętową przedstawionego rozwiązania. Deskryptora \textit{SILTP} użyto między innymi z powodu jego niezbyt skomplikowanej logiki i łatwości zaimplementowania w układzie \textit{FPGA}. Konwersja do przestrzeni \textit{YCbCr} również nie jest operacją złożoną obliczeniowo, jedynym wyzwaniem była konwersja do \textit{CIELab}, wymagająca wielu obliczeń. Warto zaznaczyć, że ta przestrzeń barw została wykorzystana w jednym z algorytmów zrealizowanych w ramach niniejszej pracy. Dokładny opis tej operacji i jej optymalna implementacja sprzętowa zostały zamieszczone w rozdziale \ref{sec:fpga_vibe}. 
 
 \section{Podsumowanie}
 \label{sec:przeglad_podsumowanie}
 
-Powyższy rozdział, został napisany w celu zaprezentowania różnych podejść do tematu segmentacji obiektów pierwszoplanowych. Jak łatwo zauważyć, na przykładzie wymienionych metod, jest to dziedzina bardzo rozległa oraz stale się rozwijająca. Pokazane algorytmy dowodzą, że do tego zagadnienia można podejść na wiele sposobów. Prezentacja nowych algorytmów lub usprawnionych wersji metod już dostępnych zazwyczaj ma miejsce na rożnego rodzaju corocznych konferencjach. Do najpopularniejszych możemy zaliczyć \textit{AVSS} (\textit{Advanced Video an Signal -- Based Surveillance}, \textit{CVPR} (\textit{Computer Vision and Patter Recognition}) oraz \textit{ICCVG} (\textit{International Conference on Computer Vision and Graphics}).
+Powyższy rozdział, został napisany w celu zaprezentowania różnych podejść do tematu segmentacji obiektów pierwszoplanowych. 
+Jak łatwo zauważyć, na przykładzie wymienionych metod, jest to dziedzina bardzo rozległa oraz stale się rozwijająca. 
+Pokazane algorytmy dowodzą, że do tego zagadnienia można podejść na wiele sposobów. 
+Prezentacja nowych algorytmów lub usprawnionych wersji metod już dostępnych zazwyczaj ma miejsce na rożnego rodzaju konferencjach. 
+Do najpopularniejszych możemy zaliczyć \textit{AVSS} (\textit{Advanced Video an Signal -- Based Surveillance}, \textit{CVPR} (\textit{Computer Vision and Patter Recognition}) oraz \textit{ICCVG} (\textit{International Conference on Computer Vision and Graphics}).
+%%TODO akurat ICCVG jest co dwa lata :)
 
-Ponieważ dokładny opis wszystkich algorytmów znajduję się we wskazanych artykułach, w tym rozdziale przedstawiono jedynie idee, oraz główne założenia poszczególnych metod. Warto zaznaczyć, że w niektórych przypadkach istnieje wiele podejść do realizacji tej samej metody. Takim przykładem, jest między innymi metoda \textit{GMM}. Drugim elementem wartym uwagi, jest sam dobór i kalibracja konkretnej metody do pracy w konkretnym środowisku, dyskusja na tym polu również może być bardzo rozległa. 
+Ponieważ dokładny opis wszystkich algorytmów znajduję się we wskazanych artykułach, w tym rozdziale przedstawiono jedynie idee, oraz główne założenia poszczególnych metod. 
+Warto zaznaczyć, że w niektórych przypadkach istnieje wiele podejść do realizacji tej samej metody. 
+Takim przykładem, jest między innymi metoda \textit{GMM}. 
+Drugim elementem wartym uwagi, jest sam dobór i kalibracja konkretnej metody do pracy w konkretnym środowisku, dyskusja na tym polu również może być bardzo rozległa. 
