@@ -1,7 +1,7 @@
 \chapter{Zakończenie}
 \label{cha:zakonczenie}
 
-Wszystkie cele postawione w rozdziale \ref{sec:wprowadzenie_cel_pracy} udało się zrealizować, zatem można stwierdzić, że badania wykonane w ramach niniejszej pracy zakończyły się sukcesem. Pierwszym krokiem było przygotowanie listy algorytmów, które miały zostać zaimplementowane na docelowej platformie. Zgodnie z założeniami pracy zdecydowano się wybrać metody, będące już częściowo opracowane w ramach badań prowadzonych w Laboratorium Biocybernetyki AGH. Wybrany zestaw zawiera algorytmy prezentujące różnorodne podejścia do zagadnienia detekcji obiektów pierwszoplanowych i segmentacji tła. W stworzonej bibliotece zawarto zarówno bardzo proste obliczeniowo metody jak i bardzo zaawansowane algorytmy, zawierające wiele dodatkowych mechanizmów usprawniających ich działanie.
+Wszystkie cele postawione w rozdziale \ref{sec:wprowadzenie_cel_pracy} udało się zrealizować, zatem można stwierdzić, że badania wykonane w ramach niniejszej pracy zakończyły się sukcesem. Pierwszym krokiem było przygotowanie listy algorytmów, które miały zostać zaimplementowane na docelowej platformie. Zgodnie z~założeniami pracy zdecydowano się wybrać metody, będące już częściowo opracowane w ramach badań prowadzonych w Laboratorium Biocybernetyki AGH. Wybrany zestaw zawiera algorytmy prezentujące różnorodne podejścia do zagadnienia detekcji obiektów pierwszoplanowych i segmentacji tła. W~stworzonej bibliotece zawarto zarówno bardzo proste obliczeniowo metody jak i bardzo zaawansowane algorytmy, zawierające wiele dodatkowych mechanizmów usprawniających ich działanie.
 
 Kolejnym etapem było przygotowanie modelu programowego dla każdego algorytmu. Wszystkie implementacje przygotowano z wykorzystaniem biblioteki \textit{OpenCV} i uruchomiono na tym samym komputerze klasy PC. Do przetestowania zaimplementowanych rozwiązań wykorzystano bardzo często stosowaną metodologię \cite{changedetection_15} oraz zbiór sekwencji testowych \textit{Change Detection} \cite{change_detection_web}. 
 
@@ -14,7 +14,7 @@ Efekty tego rozwiązania były jednak widoczne podczas działania algorytmu w rz
 Następny i jednocześnie najbardziej zaawansowany etap pracy to przygotowanie implementacji sprzętowej każdego z algorytmów. Przygotowane modele programowe nie dają możliwości przetwarzania obrazu w czasie rzeczywistym. Maksymalna prędkość analizy obrazu zależy od stopnia złożoności algorytmu i waha się w przedziale od jednej do kilkunastu klatek na sekundę. W związku z powyższym, wszystkie algorytmy zaimplementowano na wspólnej platformie sprzętowej i porównano pod kątem wykorzystania dostępnych zasobów oraz mocy.
 
 Podczas tworzenia implementacji posiłkowano się rozwiązaniami zaimplementowanymi już w Laboratorium Biocybernetyki AGH. 
-%TODO to trzeba opisać mniej eufemistycznie - ale wcześniej.
+%%TODO to trzeba opisać mniej eufemistycznie - ale wcześniej.
 Większość metod udało się uruchomić we wszystkich wymaganych rozdzielczościach, od \textit{576p@50fps} i \textit{1080p@50fps}. 
 W pojedynczych przypadkach ze względu stopień rozbudowania algorytmu, zaprzestano na podstawowej rozdzielczości.
 

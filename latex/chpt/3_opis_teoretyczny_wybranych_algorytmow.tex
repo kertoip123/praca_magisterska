@@ -227,7 +227,7 @@ Do ich detekcji wykorzystany został algorytm Harrisa-Stephensa, dokładny opis 
 Obraz podzielono na takie same kwadratowe bloki o rozmiarze $32x32$ piksele każdy. Dla kolejnych pikseli obliczana jest odpowiedź $H_R$ detektora narożników (metoda Harrisa-Stephensa). %%TODO narożników nie krawędzi
 W każdym z bloków wyznaczany jest piksel dla którego zwrócona wartość, jest najwyższa. Wyższa wartość $H_R$ oznacza większe prawdopodobieństwo, że dany piksel jest właśnie narożnikiem jakiegoś obiektu. Jeżeli otrzymana wartość $H_R$ przekracza ustalony z góry próg $H_{TH}$, to dany piksel wraz z współrzędnymi w odpowiadającym mu bloku oraz z wartościami sąsiadujących pikseli (ponownie za sąsiedztwo uznajemy kontekst $3x3$) zostaje zapisany.
 
-Kolejnym krokiem jest porównanie, zapamiętanych z poprzedniej ramki, pikseli reprezentujących narożniki obiektów z~pikselami z aktualnego obrazu. Porównania przeprowadzane są w obszarze wyznaczonych wcześniej bloków o rozmiarze $32x32$. Kolejne piksele w danym bloku, wraz z otaczającym kontekstem $3x3$, są porównywane z zapamiętanym kontekstem piksela, będącego narożnikiem. Jeżeli dla danego bloku, nie wyznaczono w poprzedniej ramce takiego piksela, to cały blok zostaje wyłączony z analizy. Porównanie dwóch kontekstów opiera się na obliczeniu SAD (ang. \textit{Sum of Absolute Difference} -- suma modułów różnicy). Wartość odpowiadających sobie pikseli w obu kontekstach są od siebie odejmowane, następnie obliczana jest suma wartości bezwzględnych z tych różnic. Dla każdego bloku, poszukiwany jest piksel, dla którego obliczony SAD jest najmniejszy. Jego odległość od piksela będącego narożnikiem, to tzw. wektor przepływu optycznego (ang. \textit{optical flow vector}). %%TODO trochę niejasne, powinno być, że z poprzedniej ramki - jest w pierwszym zdaniu
+Kolejnym krokiem jest porównanie, zapamiętanych z poprzedniej ramki, pikseli reprezentujących narożniki obiektów z~pikselami z aktualnego obrazu. Porównania przeprowadzane są w obszarze wyznaczonych wcześniej bloków o rozmiarze $32x32$. Kolejne piksele w danym bloku, wraz z otaczającym kontekstem $3x3$, są porównywane z zapamiętanym kontekstem piksela, będącego narożnikiem. Jeżeli dla danego bloku, nie wyznaczono w poprzedniej ramce takiego piksela, to cały blok zostaje wyłączony z analizy. Porównanie dwóch kontekstów opiera się na obliczeniu \textit{SAD} (ang. \textit{Sum of Absolute Difference} -- suma modułów różnicy). Wartość odpowiadających sobie pikseli w obu kontekstach są od siebie odejmowane, następnie obliczana jest suma wartości bezwzględnych z tych różnic. Dla każdego bloku, poszukiwany jest piksel, dla którego obliczony \textit{SAD} jest najmniejszy. Jego odległość od piksela będącego narożnikiem, to tzw. wektor przepływu optycznego (ang. \textit{optical flow vector}). %%TODO trochę niejasne, powinno być, że z poprzedniej ramki - jest w pierwszym zdaniu
 Jest ona obliczana osobno wzdłuż osi $x$ i $y$, ze względu na przyjęty rozmiar każdego bloku może przyjmować wartości od $-32$ do $32$ dla obu osi.
 
 Ostatnią operacją jest wyznaczenie wektora przesunięcia, jest on definiowany jako mediana wektorów przepływu optycznego otrzymanych dla każdego z bloków. 
@@ -433,7 +433,7 @@ Przyjęto założenie, że parametr ten posiada także ograniczenie dolne jak i 
 	\label{equ:pbas_t_update}	
 	\end{equation}
 
-%TODO mógłby być komentarz dlaczego takie podejście (ze zmiennymi R i T ) jest lepsze od stałych
+%%TODO mógłby być komentarz dlaczego takie podejście (ze zmiennymi R i T ) jest lepsze od stałych
 Wartość $\bar{d}_{min}(x_i)$ określa dynamikę tła. W przypadku statycznego tła wartość ta będzie równa 0, natomiast jeżeli tło zawiera więcej dynamicznych elementów to będzie odpowiednio wyższa. Parametr ten jest wykorzystywany podczas dynamicznej aktualizacji parametru $R$, opisanej wzorem (\ref{equ:pbas_r_update}). Jak łatwo zauważyć, wzrost dynamiki tła, powoduje również delikatny wzrost progu $R$. W przypadku dynamicznego tła często dokonywana jest błędna klasyfikacja piksela jako pierwszoplanowego, z tego powodu zastosowano dynamiczną aktualizację parametru $T$ opisaną równaniem (\ref{equ:pbas_t_update}). Wartość jest podwyższa właśnie w sytuacji występowania dynamicznego tła w celu lepszego dostosowania modelu.
 
 \subsection{Detekcja obiektów statycznych}
@@ -559,13 +559,13 @@ Drugim dodatkowym elementem modelu jest średnia krocząca współczynnika podob
 	\end{equation}
 \noindent gdzie poprzez $S_{{cnt}_{TH}}$ oznaczamy minimalną liczbę ramek przez którą obiekt musi pozostać statyczny.
 \\
-\noindent Opisane parametry są wykorzystywane w procesie aktualizacji modelu, niezależnie od decyzji podjętej według standardowej procedury, model zostaje zaktualizowany jeżeli spełniony jest warunek logiczny opisany równaniem (\ref{equ:pbas_plus_update}). W praktyce oznacza to, że aktualizowane zostają piksele 
+\noindent Opisane parametry są wykorzystywane w procesie aktualizacji modelu, niezależnie od decyzji podjętej według standardowej procedury, model zostaje zaktualizowany jeżeli spełniony jest warunek logiczny opisany równaniem (\ref{equ:pbas_plus_update}). W praktyce oznacza to, że aktualizowane zostają piksele reprezentujące duchy, czyli obiekty, które nie znajdują się na rzeczywistym obrazie.
     \begin{equation}
 	    S_{O_k} \geq S_{TH} \land S(x_i)_{cnt} > S_{cnt_{TH}} \land EC(x_i)_{mean} < 0.5
 	\label{equ:pbas_plus_update}	
 	\end{equation}
 	
-	%TODO skomentować co to w praktyce oznacza ...
+	%%TODO skomentować co to w praktyce oznacza ...
 
 
 \subsection{Indeksacja obiektów}
@@ -574,11 +574,11 @@ Drugim dodatkowym elementem modelu jest średnia krocząca współczynnika podob
 Opisany w rozdziale \ref{subsec:pbas_duchy} mechanizm detekcji tzw. ,,duchów'' wymaga rozróżnienia poszczególnych obiektów na wynikowej masce binarnej. 
 W celu osiągnięcia takiego rezultatu, konieczne jest zastosowanie algorytmu indeksacji. 
 Istnieje kilka podejść do realizacji tego zadania. 
-W niniejszej pracy zdecydowano się zastosować metodę jednoprzebiegową, ze względu na jej stosunkowo prostą implementację w układach \textit{FPGA}. Sam algorytm został dokładnie przedstawiony w publikacji \cite{kryjak_14_pbas}, natomiast problem realizacji na platformie sprzętowej został szerzej rozwinięty w rozdziale \ref{sec:fpga_pbas_plus}. %%TODO powt. imple... 
+W niniejszej pracy zdecydowano się zastosować metodę jednoprzebiegową, ze względu na jej stosunkowo prostą implementację w~układach \textit{FPGA}. Sam algorytm został dokładnie przedstawiony w publikacji \cite{kryjak_14_pbas}, natomiast problem realizacji na platformie sprzętowej został szerzej rozwinięty w rozdziale \ref{sec:fpga_pbas_plus}. %%TODO powt. imple... 
 
 Działanie algorytmu polega na nadawaniu poszczególnym pikselom etykiet reprezentujących kolejne obiekty. 
 Piksele z taką samą etykietą reprezentują ten sam obiekt. 
-Oczekiwanym efektem końcowym, wymaganym w omawianym algorytmie jest pole oraz parametry prostokąta otaczającego każdy obiekt w danej ramce obrazu.
+Oczekiwanym efektem końcowym, wymaganym w omawianym algorytmie jest pole oraz parametry prostokąta otaczającego każdy obiekt w~danej ramce obrazu.
 Prostokąt otaczający jest reprezentowany przez cztery liczby $[x_1,y_1,x_2,y_2]$, gdzie współrzędne z indeksem 1 oznaczają lewy górny róg prostokąta, natomiast te z indeksem 2 prawy dolny róg. 
 
 Pierwszym krokiem w procesie indeksacji jest wygenerowanie sąsiedztwa na podstawie którego aktualnie analizowany piksel będzie klasyfikowany. 

@@ -7,4 +7,5 @@
 *.xml
 *.toc
 *.gz
+latex/chpt/old/*.tex
 
