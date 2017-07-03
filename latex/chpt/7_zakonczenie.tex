@@ -9,13 +9,18 @@ Otrzymane wyniki były momentami zaskakujące, okazało się między innymi, że
 Niestety, nie każde z przedstawionych podejść okazało się być idealnym rozwiązaniem. 
 Zaproponowany mechanizm niwelowania efektów ruchomej kamery, spróbowano zastosować w sekwencjach testowych z drgającą kamerą, jednak opracowany algorytm nie sprawdził się w takim środowisku.
 Efekty tego rozwiązania były jednak widoczne podczas działania algorytmu w rzeczywistym warunkach z ruchomą kamerą. 
-%%TODO jak wcześniej to nie było ani pod to projektowane ani testowane
+
 
 Następny i jednocześnie najbardziej zaawansowany etap pracy to przygotowanie implementacji sprzętowej każdego z algorytmów. Przygotowane modele programowe nie dają możliwości przetwarzania obrazu w czasie rzeczywistym. Maksymalna prędkość analizy obrazu zależy od stopnia złożoności algorytmu i waha się w przedziale od jednej do kilkunastu klatek na sekundę. W związku z powyższym, wszystkie algorytmy zaimplementowano na wspólnej platformie sprzętowej i porównano pod kątem wykorzystania dostępnych zasobów oraz mocy.
 
-Podczas tworzenia implementacji posiłkowano się rozwiązaniami zaimplementowanymi już w Laboratorium Biocybernetyki AGH. 
-%%TODO to trzeba opisać mniej eufemistycznie - ale wcześniej.
+Podczas tworzenia implementacji wzorowano się i~częściowo wykorzystano moduły stworzone w~ramach wcześniejszych prac  w~Laboratorium Biocybernetyki AGH. 
+%TODO proszę sprawdzić, czy takie sformułowanie się Panu podoba ? - PJ: ok
 Większość metod udało się uruchomić we wszystkich wymaganych rozdzielczościach, od \textit{576p@50fps} i \textit{1080p@50fps}. 
 W pojedynczych przypadkach ze względu stopień rozbudowania algorytmu, zaprzestano na podstawowej rozdzielczości.
 
-Podsumowując, przygotowana biblioteka zawiera wiele ciekawych i efektywnych algorytmów, a~uzyskane wyniki testów są zbliżone do rezultatów innych popularnych metod z rankingu \textit{Change Detection} \cite{change_detection_web}. Przeniesienie implementacji na układ \textit{FPGA} w niektórych przypadkach było kłopotliwe, między innymi ze względu na występujące ograniczenia sprzętowe. Ostatecznie jednak wszystkie metody udało się zaimplementować i pomyślnie uruchomić. Pomimo osiągniętego sukcesu nadal istniej wiele możliwości rozwoju stworzonej biblioteki. Jak zostało wspomniane w rozdziale \ref{cha:kierunki_rozwoju}, można rozszerzyć algorytmy o dodatkową funkcjonalność jak na przykład, detekcja cieni i eliminacja dynamicznego tła. Kolejnym kierunkiem rozwoju jest optymalizacja i wzrost wydajności oraz dostosowanie wszystkich metod do przetwarzania obrazu w rozdzielczości \textit{Full HD} lub wyższej. Zakres nowych możliwości i~dalszych prac jest bardzo szeroki, jednak biorąc pod uwagę przyjęte na początku cele, uzyskane efekty można z~pewnością uznać za zadowalające. 
+Podsumowując, przygotowana biblioteka zawiera wiele ciekawych i efektywnych algorytmów, a~uzyskane wyniki testów są zbliżone do rezultatów innych popularnych metod z rankingu \textit{Change Detection} \cite{change_detection_web}. 
+Przeniesienie implementacji na układ \textit{FPGA} w niektórych przypadkach było kłopotliwe, między innymi ze względu na występujące ograniczenia sprzętowe. 
+Ostatecznie jednak wszystkie metody udało się zaimplementować i pomyślnie uruchomić. 
+Pomimo osiągniętego sukcesu nadal istniej wiele możliwości rozwoju stworzonej biblioteki. 
+Jak zostało wspomniane w rozdziale \ref{cha:kierunki_rozwoju}, można rozszerzyć algorytmy o dodatkową funkcjonalność jak na przykład, detekcja cieni i eliminacja dynamicznego tła. 
+Kolejnym kierunkiem rozwoju jest optymalizacja i wzrost wydajności oraz dostosowanie wszystkich metod do przetwarzania obrazu w rozdzielczości \textit{Full HD} lub wyższej. Zakres nowych możliwości i~dalszych prac jest bardzo szeroki, jednak biorąc pod uwagę przyjęte na początku cele, uzyskane efekty można z~pewnością uznać za zadowalające. 

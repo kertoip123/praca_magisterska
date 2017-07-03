@@ -117,12 +117,12 @@ backend=bibtex
 
 \titlePL{Biblioteka modułów sprzętowych do segmentacji obiektów pierwszoplanowych}
 %\titleEN{}
-\titleEN{The library of hardware implementations of foreground segmentation algorithms}
+\titleEN{Hardware modules library for foreground object segmentation}
 
 
 \shorttitlePL{Biblioteka modułów sprzętowych do segmentacji obiektów pierwszoplanowych} % skrócona wersja tytułu jeśli jest bardzo długi
 %\shorttitleEN{}
-\shorttitleEN{The library of hardware implementations of foreground segmentation algorithms}
+\shorttitleEN{Hardware modules library for foreground object segmentation}
 
 \thesistype{Praca dyplomowa magisterska}
 
@@ -163,6 +163,20 @@ backend=bibtex
 \setcounter{tocdepth}{2}
 \tableofcontents
 \clearpage
+
+%TODO te abstrakty !!!!
+\begin{center}
+    \textbf{Abstrakt}
+\end{center}
+
+Głównym celem niniejszej pracy było zaimplementowanie biblioteki modułów sprzętowych, zawierającej różne algorytmy segmentacji obiektów pierwszoplanowych. Przedstawione metody opracowano na podstawie prac zrealizowanych dotychczas w Laboratorium Biocybernetyki AGH. Większość algorytmów służących do segmentacji obiektów  ma jedną poważna wadę, którą jest duża złożoność obliczeniowa. Powoduje to, że nie mogą one zostać użyte w systemach wykorzystujących procesory ogólnego przeznaczenia. Zaprojektowane implementację uruchomiono na karcie \textit{VC 707} z układem \textit{FPGA} z rodziny \textit{Virtex 7} firmy \textit{Xillinx}. Zaproponowane metody porównano pod względem zarówno dokładności jak i zużycia energii. Przedstawione systemy przetwarzają obraz w rozdzielczości od \textit{576x720@fps} do \textit{1920x1080@50fps}. Dodatkowo w pracy omówiono także bardziej zaawansowane zagadnienia związane z detekcją obiektów, takie jak porzucone obiekty czy dostosowanie algorytmu do ruchomej kamery \textit{PTZ}.
+
+
+\begin{center}
+    \textbf{Abstract}
+\end{center}
+
+The main purpose of the following thesis was to implement the library of hardware implementations containing various foreground segmentation algorithms. Implemented methods are based on articles and thesis which have been developed in   Biocybernetics laboratory at AGH University of Science and Technology in Kraków. Most of foreground segmentation algorithms has one major drwawback, which is high computational complexity. This fact implicates that they can not be applied in systems based on general purpose processors. Designed modules have been run on \textit{VC 707} development board with \textit{Virtex 7 FPGA} device from \textit{Xillinx}. Proposed algorithms have been compared in terms of both precission and power consumption. Presented solutions are able to handle video stream in resolution from \textit{576x720@50fps} up to \textit{1920x1080@50fps}. Additionally, more adanvced topis such as detection of abandoned objects and adaptation to work with moving \textit{PTZ} camera, have been also described. 
 
 \include{chpt/1_wstep}
 \include{chpt/2_przeglad_metod}

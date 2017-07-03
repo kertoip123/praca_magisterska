@@ -1,28 +1,24 @@
 \chapter{Wprowadzenie}
 \label{cha:wprowadzenie}
 
-%TODO Tytuł po angielsku !
-%TODO Dorobić abstrakt PL i EN oraz videoabstrakt (filmik prezentujący działanie poszczególnych metod)
-
-%%TODO To trzeba wcześniej, bo tak Pan miesza. Proszę zacząć od segmantacji i wszystko na ten temat napisać, a później do FPGA. 
-Zagadnienie segmentacji obiektów pierwszoplanowych definiujemy jako operację wyodrębniania pierwszoplanowych obiektów obrazu. Obiekty pierwszoplanowe, ze względu na ich charakterystykę, możemy podzielić na dynamiczne (ruchome) i statyczne. Przykładem obiektu statycznego może być zatrzymany na światłach samochód lub porzucony bagaż.
-%%TODO proszę napisać co to są za obiekty
-Oczekiwanym efektem końcowym, metody realizującej segmentację obiektów, jest maska binarna, na której piksele pierwszoplanowe oznaczone są na biało, a pozostałe na czarno. Zakładamy, że obraz pochodzi ze statycznie umiejscowionej kamery. 
-%%TODO ??? a co to za pojęcie.
+Zagadnienie segmentacji obiektów pierwszoplanowych definiujemy jako operację wyodrębniania tego typu obiektów na obrazie. Obiekty pierwszoplanowe, ze względu na ich charakterystykę, możemy podzielić na dynamiczne, czyli na przykład idący człowiek lub jadący samochód i statyczne. 
+Przykładem obiektu statycznego może być natomiast zatrzymany na światłach samochód lub porzucony bagaż.
+Oczekiwanym efektem końcowym, metody realizującej wspomnianą segmentację, jest maska binarna, na której piksele reprezentujące znalezione obiekty oznaczone są na biało, natomiast pozostałe na czarno. 
+ 
+%TODO Nie podoba mi się ten akapit. Za dużo razy słowo segmentacja pierwszoplanowych.... ostatnie zdanie to taka wrzutka ! Trzeba też podać przykłady obiektów dynamicznych]
 
 Należy zwrócić szczególną uwagę na potencjalne problemy i trudności występujące przy projektowaniu tego typu algorytmów. 
 Bardzo ważna jest poprawna detekcja, wspomnianych wcześniej, obiektów statycznych jak i dynamicznych. 
 Z tym zagadnieniem powiązane jest także zjawisko tzw. ,,duchów'' (ang.~\textit{ghost}). 
 Można je zaobserwować w sytuacji, gdy obiekt zatrzymany przez dłuższy czas i~błędnie zaklasyfikowany przez algorytm jako element tła, nagle zaczyna się poruszać. 
-Rozróżnienie rzeczywistych obiektów zatrzymanych od ,,duchów'' jest problematyczne, gdyż oba obiekty mają podobne właściwości. Zagadnienie to zostało szerzej opisane w rozdziale \ref{sec:model_tla_aktualizacja}.
-%%TODO to można by rozwinąć.
+Rozróżnienie rzeczywistych obiektów zatrzymanych od ,,duchów'' jest problematyczne, gdyż oba obiekty mają podobne właściwości. 
+Zagadnienie to zostało szerzej opisane w rozdziale \ref{sec:model_tla_aktualizacja}.
 
 Kolejnym poważnym utrudnieniem jest występowanie dynamicznego tła (na przykład poruszające się w tle liście i gałęzie). 
 Zagadnienie to jest zdecydowanie najbardziej złożone i do tej pory nie znaleziono rozwiązania, które eliminowałoby je w stu procentach.
 Oprócz tego, należy także mieć na uwadze zmienne oświetlenie, możliwość wystąpienie lekkich drgań kamery, różnego rodzaju szumy i zakłócenia. 
 Do grupy istotnych i często występujących problemów, możemy zaliczyć również konieczność prawidłowej detekcji cieni i odróżniania ich od właściwych obiektów pierwszoplanowych.
 
-%%TODO Zacząłbym jednak od definicji co to jest, albo jak jest rozumiana sop.
 Segmentacja obiektów pierwszoplanowych jest bardzo rozległą i cały czas dynamicznie rozwijającą się dziedziną. 
 Pracownicy naukowi ze wszystkich uczelni technicznych publikują coraz to nowe rozwiązania, bazujące na istniejących już algorytmach lub proponują podejścia całkowicie nowe, odbiegające od wcześniej przyjętej metodyki.  
 Celem tych badań, jest oczywiście rozwój opisywanego zagadnienia i dążenie do ideału, czyli algorytmu, dającego bezbłędne rezultaty nawet w rzeczywistych, najbardziej ekstremalnych warunkach. 
@@ -30,43 +26,54 @@ Na przestrzeni ostatnich kilku lat można zaobserwować spadek cen różnego rod
 W~związku z~powyższym, algorytmy odpowiedzialne za detekcję obiektów pierwszoplanowych powoli stają się nieodłącznym elementem większych i~bardziej zaawansowanych systemów wizyjnych. 
 
 Jednym z przykładów takiego systemu może być zautomatyzowany monitoring wizyjny. 
-Tego typu narzędzie może zostać wykorzystane na przykład, do obserwowania strefy zabronionej i wykrywania obecności niepożądanych tam osób. Kolejne zastosowanie algorytmów detekcji obiektów pierwszoplanowych to rozbudowany system nadzorowania ruchu drogowego. Jest to rozwiązanie umożliwiające gromadzenie danych archiwalnych oraz analizę w czasie rzeczywistym takich parametrów jak średnia prędkość pojazdów, czas przejazdu z punktu A do B, natężenie ruchu oraz aktualne utrudnienia w ruchu drogowym. Dzięki takiemu systemowi, możliwa jest między innymi optymalizacja cykli sygnalizacji świetlnej na wszystkich skrzyżowaniach, co w ostateczności skutkuje minimalizacją korków i czasu podróży.   
+Tego typu narzędzie może zostać wykorzystane na przykład do obserwowania strefy zabronionej i wykrywania obecności niepożądanych tam osób. 
+%TODO Może podać Pan więcej takich przykładów
+Kolejne zastosowanie algorytmów detekcji obiektów pierwszoplanowych to rozbudowany system nadzorowania ruchu drogowego. 
+Jest to rozwiązanie umożliwiające gromadzenie danych archiwalnych oraz analizę w czasie rzeczywistym takich parametrów jak średnia prędkość pojazdów, czas przejazdu z punktu A do B, natężenie ruchu oraz aktualne utrudnienia w ruchu drogowym. 
+Dzięki takiemu systemowi, możliwa jest między innymi optymalizacja cykli sygnalizacji świetlnej na wszystkich skrzyżowaniach, co w ostateczności skutkuje minimalizacją korków i czasu podróży.   
 
-Początkowo w dziedzinie segmentacji obiektów niezwykle istotny był czynnik ludzki, a rolę algorytmu wykrywającego obiekty pierwszoplanowe pełnił wykwalifikowany operator. Taka sytuacja bardzo często występowała w przypadku systemów monitoringu wizyjnego.
-%%TODO to jest niejasne, bo nie wiadomo do czego to się odnosi - wygląda jakby to uav.
+Początkowo w dziedzinie segmentacji obiektów niezwykle istotny był czynnik ludzki, a rolę algorytmu wykrywającego i analizującego obiekty pierwszoplanowe pełnił wykwalifikowany operator. 
+%TODO Tu trzeba też dodać, że analizującego.... bo sama segemntacja to jeszcze niewiele da.
+Taka sytuacja bardzo często występowała w przypadku systemów monitoringu wizyjnego.
 Niestety, takie rozwiązanie z biegiem czasu stało się nieopłacalne, na co miało wpływ kilka czynników. 
 Po pierwsze, należy zaznaczyć, że zazwyczaj przez 99\% czasu pracy operatora nie występują żadne angażujące go sytuacje. 
-Człowiek nie jest w stanie analizować i nadzorować jednocześnie kilku obrazów. 
+Człowiek nie jest w stanie przez dłuższy czas skupić się na analizie i nadzorować jednocześnie kilku obrazów. 
+%TODO też, że nie jest w stanie się długo skupić na analizie
 Z tego powodu, konieczne jest zastosowanie systemu działającego w czasie rzeczywistym, który daje możliwość przetwarzania określonej liczby ramek obrazu w danej rozdzielczości na sekundę.
-%%TODO to trzeba odnieść do monitoringu wizyjnego i jakoś lepiej wkomponować.
 
 W związku z powyższym, coraz częściej do realizacji systemów wizyjnych wykorzystuje się układy \textit{FPGA} (ang. \textit{Field--Programmable Gate Array} –- bezpośrednio programowalna macierz bramek). 
-Wraz z~rozwojem technologicznym zaczęły one stanowić sensowną alternatywę dla komputerów klasy \textit{PC}~(ang. \textit{Personal Computer} -- komputer osobisty) z procesorami typu \textit{GPP} (ang. \textit{General Purpose Processor -- procesor ogólnego przeznaczenia}. 
+Wraz z~rozwojem technologicznym zaczęły one stanowić atrakcyjną alternatywę dla komputerów klasy \textit{PC}~(ang. \textit{Personal Computer} -- komputer osobisty) z procesorami typu \textit{GPP} (ang. \textit{General Purpose Processor -- procesor ogólnego przeznaczenia}. 
 Jedną z najważniejszych różnic pomiędzy tymi układami jest pełna rekonfigurowalność w przypadku \textit{FPGA}. 
-Podczas procesu produkcji procesorów typu \textit{GPP} tranzystory są na stałe zatapiane w krzemie i nie ma możliwości późniejszej ingerencji w zaprojektowaną architekturę.  %%TODO Zatapiane to dobre słowo ? -- wydaje mi się, że tak
+Podczas procesu produkcji procesorów typu \textit{GPP} tranzystory są na stałe zatapiane w krzemie i nie ma możliwości późniejszej ingerencji w zaprojektowaną architekturę.  
 Dostajemy możliwość modyfikacji jedynie programu, który na takim procesorze będzie wykonywany. 
 Z~kolei w układach \textit{FPGA} dostajemy pełną możliwość przeprojektowania architektury i~dostosowania jej do potrzeb danego zadania. 
 
 Ze względu na pełną rekonfigurowalność oraz możliwość zrównoleglenia obliczeń układy \textit{FPGA} zyskują zdecydowaną przewagę nad procesorami \textit{GPP} w kontekście realizacji operacji przetwarzania obrazów w czasie rzeczywistym. 
 W przypadku standardowego procesora operacja przetworzenia jednej ramki obrazu wymaga odczytania jej w całości, następnie analizy po kolei każdego piksela i na końcu przesłania finalnej ramki na wyjście. 
 Systemy wizyjne w układach \textit{FPGA} działają nieco inaczej, tutaj przetwarzanie obrazu odbywa się potokowo. 
-W każdym takcie zegara na wejście modułu podawany jest jeden piksel z obrazu wejściowego oraz jeden piksel zostaje wystawiony na wyjściu. Dzięki temu latencja (opóźnienie) między obrazem wejściowym a wyjściowym trwa dokładnie tyle ile przeanalizowanie jednego piksela a nie całej ramki jak ma to miejsce przy wykorzystaniu procesorów \textit{GPP}. Jest to tzw. równoległość drobnoziarnista (ang. \textit{fine-grained}). W przypadku standardowych procesorów \textit{GPP} posiadających więcej niż jeden rdzeń, również istnieje możliwość wykonywania obliczeń równoległych. Liczba dostępnych wątków, jest jednak zdecydowanie niższa niż w układzie \textit{FPGA}, takie podejście nazywamy zrównolegleniem gruboziarnistym (ang. \textit{coarse-grained}). 
-%%TODO to co Pan napisał jest dyskusyjne (chodzi o ten poziom ramki). Może proszę poruszyć wątek skali zrównoleglenia.  W procku ma Pan ~ 16 wątków czyli modułów obliczenowych. W FPGA dużo więcej. 
+W każdym takcie zegara na wejście modułu podawany jest jeden piksel z obrazu wejściowego oraz jeden piksel zostaje wystawiony na wyjściu. 
+Dzięki temu latencja (opóźnienie) między obrazem wejściowym a wyjściowym trwa dokładnie tyle ile przeanalizowanie jednego piksela a nie całej ramki, jak ma to miejsce przy wykorzystaniu procesorów \textit{GPP}. 
+Jest to tzw. równoległość drobnoziarnista (ang. \textit{fine-grained}). 
+W przypadku standardowych procesorów \textit{GPP} posiadających więcej niż jeden rdzeń, również istnieje możliwość wykonywania obliczeń równoległych. 
+Liczba dostępnych wątków, jest jednak zdecydowanie niższa niż w układzie \textit{FPGA}, takie podejście nazywamy zrównolegleniem gruboziarnistym (ang. \textit{coarse-grained}). 
 
-%%TODO a ten akapit to trochę nie pasuje - jakieś zdanie wprowadzenia jest potrzebne.
-Projektowanie algorytmów do segmentacji obiektów pierwszoplanowych jest procesem dość złożonym i wieloetapowym. Często stosowane jest podejście, w którym dany algorytm w pierwszej kolejności zostaje zaimplementowany właśnie na standardowej, ogólnodostępnej platformie takiej jak komputer \textit{PC}. 
+Implementowanie algorytmów do segmentacji obiektów pierwszoplanowych i uruchamianie ich na platformie sprzętowej jest procesem dość złożonym i wieloetapowym. 
+%TODO chyba chodzi Panu nie o same algorytmy, ale o ich implementacje sprzętowe w FPGA ?
+Często stosowane jest podejście, w którym dany algorytm w pierwszej kolejności zostaje zaimplementowany właśnie na standardowej, ogólnodostępnej platformie takiej jak komputer \textit{PC}. 
 Taka implementacja jest zdecydowanie prostsza, gdyż mamy do dyspozycji wiele wysokopoziomowych języków np. \textit{C++, Java, Python, Matlab}. 
 Architektura w układach \textit{FPGA} jest tworzona z wykorzystaniem języków do opisu sprzętu, takich jak \textit{Verilog} i \textit{VHDL} (\textit{Very High Speed Integrated Circuits Hardware Description Language}). 
-Niestety, nie wszystkie operacje i algorytmy mogą zostać bezproblemowo przeniesione z platformy \textit{PC} na układ \textit{FPGA} i zaimplementowane w systemie potokowym. 
-%%TODO to nie jest prawda ! jedno i drugie można ale używa dużo zasobów. Natomiast potokowo nie można algorytmów dla których sposób dostępu do danych zależy od treści.
+Niestety, nie wszystkie operacje i algorytmy mogą zostać bezproblemowo przeniesione z platformy \textit{PC} na układ \textit{FPGA} i~zaimplementowane w systemie potokowym. 
 Przykładami mogą być operacje zmiennoprzecinkowe oraz skomplikowane obliczeniowo funkcje matematyczne (np. trygonometryczne, eksponenta, logarytmy). 
-Mimo tych ograniczeń, ciężko wskazać alternatywne rozwiązanie, które spełniało by wymóg pracy w czasie rzeczywistym. 
+Mimo tych ograniczeń, ciężko wskazać alternatywne rozwiązanie, które spełniało by wymóg pracy w~czasie rzeczywistym. 
 Dodatkowo porównując do procesorów \textit{GPP}, układy reprogramowalne są rozwiązaniem wydajniejszym i bardziej energooszczędnym.
 
-Oprócz standardowych procesorów i układów \textit{FPGA} istnieje jeszcze trzecia alternatywa, którą są procesory graficzne \textit{GPU} (ang. \textit{Graphics Processing Unit}). Takie rozwiązanie na pewno jest o wiele bardziej wydajne niż procesor \textit{GPP} i posiada mniej ograniczeń niż układy \textit{FPGA}. Zużycie energii jest jednak o wiele wyższe niż w przypadku dwóch omawianych wcześniej platform. Nie można również pomiąć aspektu ekonomicznego, układy graficzne są dość kosztowne i dodatkowo wymagają współpracy ze standardowymi procesorami (technologie \textit{OpenCL} i \textit{OpenGL}). W związku z powyższym do stworzenia systemu opartego na \textit{GPU} konieczna jest kompletna stacja robocza, co wyraźnie zwiększa cenę takiego systemu. Reasumując, na chwilę obecną to właśnie układy \textit{FPGA} wydają się być najrozsądniejszą opcją, będącą jednocześnie rozwiązaniem wydajnym, energooszczędnym oraz stosunkowo tanim. 
-%%TODO pomija Pan GPU - jakoś by się przydało odnieść
+Oprócz standardowych procesorów i układów \textit{FPGA} istnieje jeszcze trzecia alternatywa, którą są procesory graficzne \textit{GPU} (ang. \textit{Graphics Processing Unit}). 
+Takie rozwiązanie na pewno jest o wiele bardziej wydajne niż procesor \textit{GPP} i posiada mniej ograniczeń niż układy \textit{FPGA}. 
+Zużycie energii jest jednak o wiele wyższe niż w przypadku dwóch omawianych wcześniej platform. 
+Nie można również pomiąć aspektu ekonomicznego, układy graficzne są dość kosztowne i dodatkowo wymagają współpracy ze standardowymi procesorami (technologie \textit{OpenCL} i \textit{OpenGL}). 
+%TODO to chyba nie do końca prawda, bo są te rozwiązanie embedded GPU...
+Reasumując, na chwilę obecną to właśnie układy \textit{FPGA} wydają się być najrozsądniejszą opcją, będącą jednocześnie rozwiązaniem wydajnym, energooszczędnym oraz stosunkowo tanim. 
 
-%%TODO i tu, że złożoność zagadnienia + opisane problemy i algorytmy wymagają platformy...
 
 \section{Cel pracy}
 \label{sec:wprowadzenie_cel_pracy}
@@ -84,7 +91,7 @@ Dzięki dużej popularności, istnieje możliwość porównania otrzymanych wyni
 Najważniejszym etapem pracy była implementacja wszystkich metod na wspólnej platformie sprzętowej. 
 Algorytmy porównano pod względem wykorzystania zasobów układu \textit{FPGA}, ilości wymaganej pamięci \textit{RAM}, wydajności obliczeniowej oraz akceleracji w stosunku do modelu programowego uruchamianego na komputerze PC. 
 Dodatkowo, sprawdzono również możliwość przetwarzania obrazu w~wyższych rozdzielczościach oraz dokonano pomiarów zużycia energii.
-%%TODO maksymalną co ?
+
 
 \section{Zawartość pracy}
 \label{sec:wprowadzenie_zawartosc_pracy}

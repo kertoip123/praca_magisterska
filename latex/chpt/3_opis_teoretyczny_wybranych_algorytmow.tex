@@ -1,13 +1,12 @@
 \chapter{Opis teoretyczny wybranych algorytmów}
 \label{cha:opis_teoretyczny_wybranych_algorytmow}
-%%TODO metody segm ob pierwsz. i tej terminologii bym się trzymał....
 
 \section{Proste metody segmentacji obiektów pierwszoplanowych}
 \label{sec:proste_metody}
 
-W tym rozdziale przedstawiono kilka prostych obliczeniowo metod segmentacji tła. Oczywiście, uzyskane z ich wykorzystaniem wyniki, znacząco odbiegają, od tego co oferują zaawansowane algorytmy. Szczególnie podczas testów w bardziej wymagającym środowisku, na przykład w przypadku drgań kamery lub z obecnością dynamicznego tła. %TODO przykład w nawiasie - przyklad czego?
+W tym rozdziale przedstawiono kilka prostych obliczeniowo metod segmentacji tła. Oczywiście, uzyskane z ich wykorzystaniem wyniki, znacząco odbiegają, od tego co oferują zaawansowane algorytmy. Szczególnie podczas testów w bardziej wymagającym środowisku, na przykład w przypadku drgań kamery lub z obecnością dynamicznego tła (np. ruszające się pod wpływem wiatru liście, fale na wodzie). %TODO przykład w nawiasie - przyklad czego?
+%TODO no dynamicznego tła (płynąca woda, ruszające się liście itp.)
 Mimo to, często znajdują zastosowanie w mniej wymagających systemach, właśnie ze względu na swoją prostotę i w rezultacie niską złożoność obliczeniową.
-%%TODO i idącą za tym niską złożonością obliczeniową.
 
 Pierwszym omawianym podejściem jest \textbf{metoda naiwna}. 
 W tym algorytmie, przyjmujemy założenie, że pierwsza ramka jest modelem referencyjnym tła i nie zawiera żadnych obiektów pierwszoplanowych. 
@@ -37,8 +36,10 @@ Jest ona wykonywana po każdej ramce obrazu i została zapisana równaniem (\ref
  \item[$\alpha$] parametr z zakresu od 0 do 1\\
 \end{eqwhere}
 
-%%TODO równianie na segmentację. Komentarz, że to może być w różnych przestrzeniach barw.
-Warto zaznaczyć, że wszystkie trzy, wymienione algorytmy mogą przetwarzać obraz w różnych przestrzeniach barw, najpopularniejsza jest oczywiście standardowa przestrzeń kolorów \textit{RGB}. W tym przypadku do obliczenia różnicy, koniecznej do segmentacji, wykorzystuje się metrykę euklidesową. Ostateczny wzór na klasyfikację piksela przedstawiono równaniem \ref{equ:simple_seg_rgb}. Druga odmianą może być obraz w skali szarości, w takiej sytuacji obliczenia są uproszczone, gdyż konieczne jest wyznaczenie jedynie modułu z różnicy.
+Warto zaznaczyć, że wszystkie trzy, wymienione algorytmy mogą przetwarzać obraz w różnych przestrzeniach barw, przy czym najpopularniejsza jest oczywiście standardowa przestrzeń kolorów \textit{RGB}. 
+W~tym przypadku do obliczenia różnicy, koniecznej do segmentacji, wykorzystuje się metrykę euklidesową. 
+Ostateczny wzór na klasyfikację piksela przedstawiono równaniem \ref{equ:simple_seg_rgb}. 
+Druga odmianą może być obraz w skali szarości, w takiej sytuacji obliczenia są uproszczone, gdyż konieczne jest wyznaczenie jedynie modułu z różnicy.
 
     \begin{equation}
         F(x,y) = 
@@ -59,10 +60,8 @@ Warto zaznaczyć, że wszystkie trzy, wymienione algorytmy mogą przetwarzać ob
 
 \section{Visual Background Extractor}
 \label{sec:vibe_teoria}
-%%TODO proszę podać referencję do oryginalnej wersji artykułu - zotała podana w drugim akapicie
 
 Algorytm nazywany w skrócie \textit{ViBE} (\textit{Visual Background Extractor}), jak zostało wspomniane w rozdziale \ref{sec:model_poprzednie_ramki}, jest metodą bazującą na modelu opartym o wartości pikseli obserwowane w poprzednich ramkach obrazu. 
-%%TODO raczej w wartości pikseli obserwowane w poprzednich ramkach ?
 Warto ponownie podkreślić, że zapamiętane wartości pikseli z poprzednich ramek obrazu to jedyna informacje wykorzystywane przez ten algorytm. Podobnie jak większość innych metod, \textit{ViBE} może zostać dostosowane do pracy z~różnymi przestrzeniami barw (np. \textit{RGB}, skala szarości, \textit{CIELab}).
 
 Opisana w niniejszej pracy wersja algorytmu została przedstawiona w publikacji \cite{kryjak_14_vibe}. 
@@ -118,7 +117,7 @@ Gdzie:
 	\item[$\alpha,\, \beta$] wagi wynoszące odpowiednio \num{1} i \num{1.5}
 \end{eqwhere}
 
-%%TODO komentarz o tym, dlaczego rozbicie jest istotne
+
 \noindent Składowa jasności \textit{L} ma mniejsze znaczenie, w kontekście rozróżniania obiektów, od składowych chrominancji \textit{a} i \textit{b}. W związku z tym, eksperymentalnie zastosowano w jej przypadku minimalnie niższą wagę.  
 
 W omawianej metodzie wykorzystano konserwatywną politykę aktualizowania modelu tła -- szczegółowe różnice pomiędzy podejściem liberalnym a konserwatywnym zaprezentowano w rozdziale \ref{sec:model_tla_aktualizacja}. 
@@ -127,8 +126,9 @@ W trakcie aktualizacji, wprowadzony został element losowy. Mianowicie dla każd
 Przyjęto, że prawdopodobieństwo wykonania uaktualnienia jest stałe i reprezentowane przez parametr $T$. 
 
 Sam proces jest bardzo prosty, kiedy już dany model zostanie zakwalifikowany do zaktualizowania wybierana jest losowa próbka i jej wartość zostaje nadpisana przez aktualną wartość piksela $\upsilon(x,y)$. 
-Dodatkowo wybierany jest losowo jeden model z najbliższego sąsiedztwa (kontekst przestrzenny o rozmiarze $3x3$) aktualnie analizowanego piksela i w nim także jedna losowo wybrana próbka zostaje nadpisana wartością $\upsilon(x,y)$. Takie działanie ma na celu, częściową eliminację negatywnych skutków konserwatywnego podejścia do aktualizacji modelu. 
+Dodatkowo wybierany jest losowo jeden model z najbliższego sąsiedztwa (kontekst przestrzenny o rozmiarze $3x3$) aktualnie analizowanego piksela i w nim także jedna losowo wybrana próbka zostaje nadpisana wartością $\upsilon(x,y)$. Takie działanie ma na celu, częściową eliminację negatywnych skutków konserwatywnego podejścia do aktualizacji modelu, czyli zjawiska ,,duchów''. 
 %%TODO napisać po co to
+%TODO no ale konkretnie, że eliminacja duchów 
 
 Warto podkreślić, że algorytm \textit{ViBE} w omówionej tutaj, podstawowej wersji wymaga bardzo niedużej liczby parametrów. 
 Należy zdefiniować jedynie liczbę próbek $N$ zapisanych w każdym modelu, promień $R$ okręgu wykorzystywanego w teście dopasowania, wymaganą minimalną liczbę próbek $\#_{min}$, leżącą wewnątrz wspomnianego okręgu oraz prawdopodobieństwo wykonania aktualizacji $T$.
@@ -213,7 +213,7 @@ gdzie przez $M_t(x,y)$ rozumiemy model tła dla piksela o współrzędnych $x$, 
 
 
 Jak łatwo zauważyć, po takiej operacji część modeli tła, związana ze skrajnymi pikselami została usunięta i wymaga ponownej inicjalizacji. W tym przypadku, zamiast losowego inicjalizowania, opartego na wartości sąsiednich pikseli, do wszystkich próbek w danym modelu przypisana zostaje aktualna wartość piksela. Takie działanie jest konieczne, ponieważ nie ma możliwości wyznaczenie sąsiedztwa dla skrajnych pikseli.
-%%TODO gdyż zwykle jest to jedna skrajna linia...
+
 
 \subsection{Wyznaczanie rzadkiego przepływu optycznego}
 \label{subsec:vibe_of}
@@ -224,10 +224,10 @@ Obliczanie przepływu nie jest wykonywane na całej ramce obrazu, a jedynie na r
 Wybierane są takie fragmenty, na których najprościej śledzić przesunięcie, w tym przypadku zdecydowano się na analizę pikseli reprezentujących narożniki obiektów. 
 Do ich detekcji wykorzystany został algorytm Harrisa-Stephensa, dokładny opis tej metody zamieszczono w podrozdziale \ref{subsec:vibe_harris}.
 
-Obraz podzielono na takie same kwadratowe bloki o rozmiarze $32x32$ piksele każdy. Dla kolejnych pikseli obliczana jest odpowiedź $H_R$ detektora narożników (metoda Harrisa-Stephensa). %%TODO narożników nie krawędzi
+Obraz podzielono na takie same kwadratowe bloki o rozmiarze $32x32$ piksele każdy. Dla kolejnych pikseli obliczana jest odpowiedź $H_R$ detektora narożników (metoda Harrisa-Stephensa). 
 W każdym z bloków wyznaczany jest piksel dla którego zwrócona wartość, jest najwyższa. Wyższa wartość $H_R$ oznacza większe prawdopodobieństwo, że dany piksel jest właśnie narożnikiem jakiegoś obiektu. Jeżeli otrzymana wartość $H_R$ przekracza ustalony z góry próg $H_{TH}$, to dany piksel wraz z współrzędnymi w odpowiadającym mu bloku oraz z wartościami sąsiadujących pikseli (ponownie za sąsiedztwo uznajemy kontekst $3x3$) zostaje zapisany.
 
-Kolejnym krokiem jest porównanie, zapamiętanych z poprzedniej ramki, pikseli reprezentujących narożniki obiektów z~pikselami z aktualnego obrazu. Porównania przeprowadzane są w obszarze wyznaczonych wcześniej bloków o rozmiarze $32x32$. Kolejne piksele w danym bloku, wraz z otaczającym kontekstem $3x3$, są porównywane z zapamiętanym kontekstem piksela, będącego narożnikiem. Jeżeli dla danego bloku, nie wyznaczono w poprzedniej ramce takiego piksela, to cały blok zostaje wyłączony z analizy. Porównanie dwóch kontekstów opiera się na obliczeniu \textit{SAD} (ang. \textit{Sum of Absolute Difference} -- suma modułów różnicy). Wartość odpowiadających sobie pikseli w obu kontekstach są od siebie odejmowane, następnie obliczana jest suma wartości bezwzględnych z tych różnic. Dla każdego bloku, poszukiwany jest piksel, dla którego obliczony \textit{SAD} jest najmniejszy. Jego odległość od piksela będącego narożnikiem, to tzw. wektor przepływu optycznego (ang. \textit{optical flow vector}). %%TODO trochę niejasne, powinno być, że z poprzedniej ramki - jest w pierwszym zdaniu
+Kolejnym krokiem jest porównanie, zapamiętanych z poprzedniej ramki, pikseli reprezentujących narożniki obiektów z~pikselami z aktualnego obrazu. Porównania przeprowadzane są w obszarze wyznaczonych wcześniej bloków o rozmiarze $32x32$. Kolejne piksele w danym bloku, wraz z otaczającym kontekstem $3x3$, są porównywane z zapamiętanym kontekstem piksela, będącego narożnikiem. Jeżeli dla danego bloku, nie wyznaczono w poprzedniej ramce takiego piksela, to cały blok zostaje wyłączony z analizy. Porównanie dwóch kontekstów opiera się na obliczeniu \textit{SAD} (ang. \textit{Sum of Absolute Difference} -- suma modułów różnicy). Wartość odpowiadających sobie pikseli w obu kontekstach są od siebie odejmowane, następnie obliczana jest suma wartości bezwzględnych z tych różnic. Dla każdego bloku, poszukiwany jest piksel, dla którego obliczony \textit{SAD} jest najmniejszy. Jego odległość od piksela będącego narożnikiem, to tzw. wektor przepływu optycznego (ang. \textit{optical flow vector}). 
 Jest ona obliczana osobno wzdłuż osi $x$ i $y$, ze względu na przyjęty rozmiar każdego bloku może przyjmować wartości od $-32$ do $32$ dla obu osi.
 
 Ostatnią operacją jest wyznaczenie wektora przesunięcia, jest on definiowany jako mediana wektorów przepływu optycznego otrzymanych dla każdego z bloków. 
@@ -324,12 +324,11 @@ Warto jeszcze raz podkreślić niewielką liczbę parametrów -- ostateczna list
 
 \section{Pixel-Based Adaptive Segmenter}
 \label{sec:pbas_teoria}
-%%TODO proszę podać referencję do oryginalnej wersji artykułu - jest w drugim akapicie
 
 Omawiany algorytm jest rozszerzeniem opisanej rozdziale \ref{subsec:vibe_opis} metody \textit{ViBE}. 
-\textit{PBAS} (ang. \textit{Pixel Based Adaptive Segmenter}, podobnie jak opisana już wcześniej metoda, także posiada model, który składa się między innymi z próbek pikseli pochodzących z poprzednich ramek obrazu. 
-Dodatkowo, próg dopasowania oraz prawdopodobieństwo dokonania aktualizacji są niezależne i na bieżąco uaktualniane dla każdego modelu. 
-Opisywany algorytm może zostać zaimplementowany zarówno w wersji \textit{RGB} jak i w skali szarości.
+\textit{PBAS} (ang. \textit{Pixel Based Adaptive Segmenter}, podobnie jak opisana już wcześniej metoda, także posiada model, który składa się między innymi z~próbek pikseli pochodzących z~poprzednich ramek obrazu. 
+Dodatkowo, próg dopasowania oraz prawdopodobieństwo dokonania aktualizacji są niezależne i~na bieżąco uaktualniane dla każdego modelu. 
+Opisywany algorytm może zostać zaimplementowany zarówno w~wersji \textit{RGB} jak i~w~skali szarości.
 
 Algorytm został zaprezentowany w artykule \cite{kryjak_14_pbas} i to właśnie na jego podstawie powstał niniejszy opis. 
 Oprócz standardowej wersji metody \textit{PBAS} autorzy zaproponowali także dodatkowy mechanizm eliminacji tzw. ,,duchów'' (opis tego zjawiska został dokładnie opisany w rozdziale \ref{subsec:pbas_duchy}). 
@@ -380,8 +379,9 @@ Ponieważ każdy kanał analizowany jest osobno, funkcję odległości pomiędzy
 Kolejnym krokiem po przeprowadzeniu testu dopasowania i klasyfikacji piksela jest aktualizacja modelu tła. 
 Zastosowano konserwatywne podejście, czyli aktualizowane są tylko piksele sklasyfikowane jako tło. 
 Analogicznie jak w algorytmie \textit{ViBE} decyzja o aktualizacji podejmowana jest losowo. 
-Prawdopodobieństwo jej wykonania wynosi $p = 1/T(x_i)$, gdzie parametr $T(x_i)$ jest dynamicznie aktualizowany i niezależny dla każdego piksela. Sama aktualizacja, polega na nadpisaniu, losowo wybranej próbki $B_k(x_i)$ z modelu aktualną wartością piksela $I(x_i)$. Dodatkowo, wybierany jest losowy piksela z otoczenia $3x3$ i losowo wybrana próbka z modelu mu odpowiadającego, jest nadpisywana wartością tego piksela. Wprowadzenie czynnika losowego, pozwala w pewnym stopniu wyeliminować negatywne skutki konserwatywnego podejścia do aktualizacji modelu.
+Prawdopodobieństwo jej wykonania wynosi $p = 1/T(x_i)$, gdzie parametr $T(x_i)$ jest dynamicznie aktualizowany i niezależny dla każdego piksela. Sama aktualizacja, polega na nadpisaniu, losowo wybranej próbki $B_k(x_i)$ z modelu aktualną wartością piksela $I(x_i)$. Dodatkowo, wybierany jest losowy piksela z otoczenia $3x3$ i losowo wybrana próbka z modelu mu odpowiadającego, jest nadpisywana wartością tego piksela. Wprowadzenie czynnika losowego, pozwala w pewnym stopniu wyeliminować negatywne skutki konserwatywnego podejścia do aktualizacji modelu, ma także pozytywny wpływ na zjawisko występowania ,,duchów''.
 %%TODO też napiać po co to
+%TODO też że duchy !
 
 Niezależnie od aktualizacji części modelu zawierającej zapamiętane próbki dokonywana jest zmiana parametrów $R(x_i)$ i $T(x_i)$. 
 W tym celu konieczne jest zdefiniowanie kolejnego elementu modelu tła, który zawiera zbiór minimalnych odległości pomiędzy próbką z modelu a aktualną wartością piksela. 
@@ -433,16 +433,19 @@ Przyjęto założenie, że parametr ten posiada także ograniczenie dolne jak i 
 	\label{equ:pbas_t_update}	
 	\end{equation}
 
-%%TODO mógłby być komentarz dlaczego takie podejście (ze zmiennymi R i T ) jest lepsze od stałych
-Wartość $\bar{d}_{min}(x_i)$ określa dynamikę tła. W przypadku statycznego tła wartość ta będzie równa 0, natomiast jeżeli tło zawiera więcej dynamicznych elementów to będzie odpowiednio wyższa. Parametr ten jest wykorzystywany podczas dynamicznej aktualizacji parametru $R$, opisanej wzorem (\ref{equ:pbas_r_update}). Jak łatwo zauważyć, wzrost dynamiki tła, powoduje również delikatny wzrost progu $R$. W przypadku dynamicznego tła często dokonywana jest błędna klasyfikacja piksela jako pierwszoplanowego, z tego powodu zastosowano dynamiczną aktualizację parametru $T$ opisaną równaniem (\ref{equ:pbas_t_update}). Wartość jest podwyższa właśnie w sytuacji występowania dynamicznego tła w celu lepszego dostosowania modelu.
+
+Wartość $\bar{d}_{min}(x_i)$ określa dynamikę tła. 
+W przypadku statycznego tła wartość ta będzie równa 0, natomiast jeżeli tło zawiera więcej dynamicznych elementów to będzie odpowiednio wyższa. Parametr ten jest wykorzystywany podczas dynamicznej aktualizacji parametru $R$, opisanej wzorem (\ref{equ:pbas_r_update}). Jak łatwo zauważyć, wzrost dynamiki tła, powoduje również delikatny wzrost progu $R$. W przypadku dynamicznego tła często dokonywana jest błędna klasyfikacja piksela jako pierwszoplanowego. 
+Z tego powodu zastosowano dynamiczną aktualizację parametru $T$ opisaną równaniem (\ref{equ:pbas_t_update}). 
+Wartość jest podwyższana właśnie w sytuacji występowania dynamicznego tła w celu lepszego dostosowania modelu.
 
 \subsection{Detekcja obiektów statycznych}
 \label{subsec:pbas_duchy}
 
-Autorzy publikacji \cite{kryjak_14_pbas} zaproponowali dodatkowy mechanizm eliminacji tzw. ,,duchów''. Przedstawiona metoda opiera się na porównaniu krawędzi na obrazie wejściowym i masce końcowej. 
-%TODO tam nic nie było o modelu tła ??? - analizowane są krawedzie na wejsciu i wyjsciu + cfd 
+Autorzy publikacji \cite{kryjak_14_pbas} zaproponowali dodatkowy mechanizm eliminacji tzw. ,,duchów''. 
+Przedstawiona metoda opiera się na porównaniu krawędzi na obrazie wejściowym i masce końcowej. 
 Jeżeli układ krawędzi, na obu obrazach jest identyczny, to znaczy, że obiekt statyczny rzeczywiście istnieje, natomiast w przeciwnym wypadku jest on duchem i zostaje usunięty z finalnej maski. 
-%%TODO trzeba jeszcze napisać, że to dotyczy obiektów statycznych...
+
 
 
 Pierwszym krokiem, który należy wykonać w celu identyfikacji potencjalnych ,,duchów'' jest operacja odejmowania dwóch kolejnych ramek. 
@@ -473,7 +476,6 @@ gdzie:
 
 \noindent Obiekt jest uznawany za statyczny (czyli potencjalnego ducha), jeżeli wartość współczynnika $S_{O_k}$ przekracza ustalony próg $S_{TH}$ (domyślnie równy $0.1$). 
 Takie działanie ma na celu eliminację błędnej klasyfikacji wynikającej z szumów i zakłóceń obrazu.
-%TODO no i dlatego,  ze duch z definicji jest statyczy
 
 
 W celu weryfikacji, czy dany obiekt istniej zarówno na obrazie wejściowym jak i masce wyjściowej, użyty został mechanizm porównywania krawędzi.
@@ -512,6 +514,15 @@ gdzie:
 \end{eqwhere}
 
 %TODO tu by się przydał rysunek tego interesu.... może być z któregoś artykułu
+%TODO Proszę to dodać...
+Opisany proces został przedstawiony na rysunku \ref{fig:pbas_ec_example}, pokazane zostały dwa scenariusze, w górnym rzędzie obiekt zatrzymany, natomiast w dolnym tzw. ,,duch''. Rysunek \textit{a} przedstawia ramkę użytą do inicjalizacji modelu tła, \textit{b} -- aktualną ramkę, \textit{c} -- efekt końcowy analizy, \textit{d} -- krawędzie na masce pierwszoplanowej, \textit{e} -- krawędzie na aktualnej masce, \textit{f} -- połączone obrazy krawędzi, \textit{g} -- znalezione obiekty.
+
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.28]{img/3/ec_example.png}
+		\caption{Przykład detekcji tzw. ,,duchów''}
+		\label{fig:pbas_ec_example}
+	\end{figure}
 
 Schemat blokowy rozszerzonej wersji metody \textit{PBAS} został przedstawiony na rysunku \ref{fig:pbas_diagram}. 
 Oprócz modułu obliczającego maskę pierwszoplanową z użyciem standardowego algorytmu \textit{PBAS} zawiera on dodatkowe bloki odpowiedzialne za wszystkie operacje opisane w niniejszym rozdziale. 
@@ -559,13 +570,13 @@ Drugim dodatkowym elementem modelu jest średnia krocząca współczynnika podob
 	\end{equation}
 \noindent gdzie poprzez $S_{{cnt}_{TH}}$ oznaczamy minimalną liczbę ramek przez którą obiekt musi pozostać statyczny.
 \\
-\noindent Opisane parametry są wykorzystywane w procesie aktualizacji modelu, niezależnie od decyzji podjętej według standardowej procedury, model zostaje zaktualizowany jeżeli spełniony jest warunek logiczny opisany równaniem (\ref{equ:pbas_plus_update}). W praktyce oznacza to, że aktualizowane zostają piksele reprezentujące duchy, czyli obiekty, które nie znajdują się na rzeczywistym obrazie.
+\noindent Opisane parametry są wykorzystywane w procesie aktualizacji modelu, niezależnie od decyzji podjętej według standardowej procedury, model zostaje zaktualizowany jeżeli spełniony jest warunek logiczny opisany równaniem (\ref{equ:pbas_plus_update}). W praktyce oznacza to, że aktualizowane zostają piksele potencjalnie reprezentujące duchy, czyli obiekty, które nie znajdują się na rzeczywistym obrazie.
+%TODO potencjalnie reprezentujące duchy - no bo nie musi to być prawdą...
     \begin{equation}
 	    S_{O_k} \geq S_{TH} \land S(x_i)_{cnt} > S_{cnt_{TH}} \land EC(x_i)_{mean} < 0.5
 	\label{equ:pbas_plus_update}	
 	\end{equation}
 	
-	%%TODO skomentować co to w praktyce oznacza ...
 
 
 \subsection{Indeksacja obiektów}
@@ -574,7 +585,7 @@ Drugim dodatkowym elementem modelu jest średnia krocząca współczynnika podob
 Opisany w rozdziale \ref{subsec:pbas_duchy} mechanizm detekcji tzw. ,,duchów'' wymaga rozróżnienia poszczególnych obiektów na wynikowej masce binarnej. 
 W celu osiągnięcia takiego rezultatu, konieczne jest zastosowanie algorytmu indeksacji. 
 Istnieje kilka podejść do realizacji tego zadania. 
-W niniejszej pracy zdecydowano się zastosować metodę jednoprzebiegową, ze względu na jej stosunkowo prostą implementację w~układach \textit{FPGA}. Sam algorytm został dokładnie przedstawiony w publikacji \cite{kryjak_14_pbas}, natomiast problem realizacji na platformie sprzętowej został szerzej rozwinięty w rozdziale \ref{sec:fpga_pbas_plus}. %%TODO powt. imple... 
+W niniejszej pracy zdecydowano się zastosować metodę jednoprzebiegową, ze względu na jej stosunkowo prostą implementację w~układach \textit{FPGA}. Sam algorytm został dokładnie przedstawiony w publikacji \cite{kryjak_14_pbas}, natomiast problem realizacji na platformie sprzętowej został szerzej rozwinięty w rozdziale \ref{sec:fpga_pbas_plus}. 
 
 Działanie algorytmu polega na nadawaniu poszczególnym pikselom etykiet reprezentujących kolejne obiekty. 
 Piksele z taką samą etykietą reprezentują ten sam obiekt. 
@@ -596,13 +607,11 @@ Ostatnim przypadkiem jest tzw. konflikt.
 Występuje on wtedy, gdy pośród sąsiednich pikseli występują różne etykiety. 
 Taka sytuacja może się przytrafić na przykład w sytuacji gdy analizowany jest obiekt w kształcie litery V. 
 Warto zauważyć, że w obszarze tego samego sąsiedztwa mogą istnieć tyko dwie różne etykiety. 
-%%TODO to nie ma zwiazku z potokowością. Po prostu dla takiego sąsiedztwa nie może być inaczej...
 W przypadku wystąpienia kolizji oba obiekty łączone są w jeden.
-%%TODO to proszę jakieś odniesienie do literatury, skoro tego Pan jakoś bardziej nie opisuje.
 
-Oprócz nadawania etykiet dla poszczególnych pikseli, na bieżąco aktualizowane jest także pole oraz parametry prostokąta otaczającego każdy do tej pory zidentyfikowany obiekt. %%TODO co to jest blok otaczający ??? chyba prostokąt tak samo obszar, cvhyba pole. POza tym jakoś trzeba wprowadzić, że oprócz nadawania etykliet.... 
-W przypadku nowego obiektu, pole inicjializowane jest oczywiście wartością 1~natomiast współrzędne wierzchołków prostokąta otaczającego przyjmują współrzędne piksela. %%TODO blok
-Dalsza aktualizacja pola obiektu wymaga jedynie inkrementacji wartości wraz z kolejnymi pikselami przypisanymi do danego obiektu. Prostokąt otaczający jest natomiast aktualizowany na podstawie współrzędnych $x$ i $y$ aktualnego piksela, zgodnie z równaniem~(\ref{equ:labeling_bbox_update}). %%TODO blok
+Oprócz nadawania etykiet dla poszczególnych pikseli, na bieżąco aktualizowane jest także pole oraz parametry prostokąta otaczającego każdy do tej pory zidentyfikowany obiekt. 
+W przypadku nowego obiektu, pole inicjializowane jest oczywiście wartością 1~natomiast współrzędne wierzchołków prostokąta otaczającego przyjmują współrzędne piksela. 
+Dalsza aktualizacja pola obiektu wymaga jedynie inkrementacji wartości wraz z kolejnymi pikselami przypisanymi do danego obiektu. Prostokąt otaczający jest natomiast aktualizowany na podstawie współrzędnych $x$ i $y$ aktualnego piksela, zgodnie z równaniem~(\ref{equ:labeling_bbox_update}).
 
     \begin{equation}
         (x_{1}, y_{1}, x_{2}, y_{2})= (min(x_{1}, x), min(y_{1}, y), max(x_{1}, x), max(y_{1}), y)
@@ -611,7 +620,7 @@ Dalsza aktualizacja pola obiektu wymaga jedynie inkrementacji wartości wraz z k
 
 \noindent
 W przypadku wystąpienia konfliktu, pola obu obiektów zostają zsumowane. Parametry nowego prostokąta otaczającego dobierane są tak, aby pokrył on oba wcześniejsze prostokąty. Spośród współrzędnych lewych górnych rogów obu łączonych obiektów, wybierane są wartości mniejsze i zostają ustawione jako współrzędne lewego rogu nowego prostokąta. W przypadku prawego dolnego rogu postępowanie jest analogiczne, tylko wybierane są wartości większe.
-%%TODO ale czego ???
+
 
 %Do zaprezentowania pełnego zapisu matematycznego przyjęto następujące oznaczenia, niech $I$ oznacza obraz binarny z którego chcemy wyodrębnić poszczególne obiekty, zbiór $F$ zawiera wszystkie piksele białe (pierwszoplanowe), natomiast zbiór $B$ czarne (reprezentujące tło). Obiektem nazywamy z kolei zbiór $C$, będący podzbiorem $F$, taki że wszystkie piksele są połączone. Dwa piksele $P$ i $Q$ są połączone, jeżeli istnieje ścieżka utworzona z pikseli $(p_0, p_1, \dotsc , p_n)$, taka że $p_0=P$, $p_n=Q$ i każdy kolejny piksel jest sąsiadem poprzedniego. W tym przypadku przez sąsiedztwo rozumiane jest $8$ pikseli otaczających.%
 
@@ -636,19 +645,19 @@ W stosunku do wcześniej omawianej metody, zwiększyła się także lista parame
 \-\hspace{1cm} $S_{cnt_{TH}}$ -- minimalna liczba ramek przez która obiekt musi pozostać statyczny ($5$) \\
 \-\hspace{1cm} $T_{S}$ -- próg binaryzacji wykorzystywany w detekcji krawędzi metodą Sobela ($50$)\\
 
-%TODO Tak sobie jeszcze myślę, że pod każdą metodą warto napisać z czego składa się model tła - przygotowanie pod analize sposóbu dostępu do pamięci. - mysle, że w przypadku ViBE oraz GMM jest to wystarczajco dobrze opisane na poczatku
-Kompletny model tła dla pojedynczego piksela składa się z $N$ zapamiętanych próbek (\ref{equ:pbas_model_1}), $N$-elementowego zbioru minimalnych odległości pomiędzy próbką a pikselem (\ref{equ:pbas_model_2}) oraz parametrów $R$ i $T$. W przypadku rozszerzonej wersji algorytmu należy jeszcze uwzględnić dodatkowy licznik $S(x_i)_{cnt}$ (\ref{equ:pbas_s_cnt}), współczynnik podobieństwa krawędzi $EC(x_i)_{mean}$ (\ref{equ:pbas_ec_mean}) oraz poprzednią wartość piksela konieczną do obliczenia różnicy dwóch kolejnych ramek.
+Kompletny model tła dla pojedynczego piksela składa się z $N$ zapamiętanych próbek (\ref{equ:pbas_model_1}), $N$-elementowego zbioru minimalnych odległości pomiędzy próbką a pikselem (\ref{equ:pbas_model_2}) oraz parametrów $R$ i~$T$. W przypadku rozszerzonej wersji algorytmu należy jeszcze uwzględnić dodatkowy licznik $S(x_i)_{cnt}$ (\ref{equ:pbas_s_cnt}), współczynnik podobieństwa krawędzi $EC(x_i)_{mean}$ (\ref{equ:pbas_ec_mean}) oraz poprzednią wartość piksela konieczną do obliczenia różnicy dwóch kolejnych ramek.
 
 
 \section{Gaussian Mixture Models}
 \label{sec:gmm_teoria}
 
-Metoda \textit{GMM} (ang. \textit{Gaussian Mixture Models}) jest algorytmem wykorzystującym statystyczny model tła. 
+Metoda \textit{GMM} (ang. \textit{Gaussian Mixture Models}) jest algorytmem wykorzystującym statystyczny model tła. Autorzy niektórych publikacji wykorzystują również alternatywną nazwę \textit{MOG} (ang. \textit{Mixture of Gaussian}). 
 %TODO podać, że jeszcze MOG (mixture of gaussian)
+%TODO no napisać, że to jest alternatywna nazwa metody
 W przeciwieństwie do algorytmów opisywanych w poprzednich rozdziałach, tutaj model tła nie składa się z zapamiętanych próbek. 
 Podobnie jak inne metody, ta także może przetwarzać obraz w różnych przestrzeniach barw. 
 
-Jako, że jest to algorytm opublikowany po raz pierwszy w 1999 roku \cite{Stauffer_Grimson_99}, to od tamtej pory doczekał się wielu różnych odmian i udoskonaleń. %%TODO algorytm doczekała ????
+Jako, że jest to algorytm opublikowany po raz pierwszy w 1999 roku \cite{Stauffer_Grimson_99}, to od tamtej pory doczekał się wielu różnych odmian i udoskonaleń. 
 Ponieważ tematem niniejszej pracy jest analiza i unifikacja algorytmów opracowanych w Laboratorium Biocybernetyki AGH w tym rozdziale zostanie zamieszczony opis powstały w oparciu o prace inżynierskie \cite{janus_15, piszczek_15}. W wyżej wymienionych publikacjach zamieszczono wyczerpujący opis metody, zarówno od strony teoretycznej jak i implementacyjnej. Niniejsza praca zawiera jedynie podstawowe założenia i główne kroki algorytmu.
 
 
@@ -771,20 +780,28 @@ Ze względu na skomplikowane operacje matematyczne z punktu widzenia układów \
 Jak słusznie zauważyli autorzy przytoczonych publikacji, algorytm \textit{GMM} zapewnia zadowalające rezultaty, aczkolwiek jest bardzo podatny na różnego rodzaju zakłócenia, szumy i zmiany oświetlenia. 
 Mimo to w większość przypadków, jest to metoda, mogąca z powodzeniem zostać wykorzystana jako samodzielny system segmentacji tła.  
 
-%%TODO A opis FTSG ??? choćby skrócony i na podstawie pracy inżynierskiej ? dla kompletności 
 \section{Algorytm Flux Tensor with Split Gaussian Models}
 \label{sec:ftsg}
 
-Metoda \textit{FTSG}, jak zostało wspomniane w rozdziale \ref{sec:model_inne}, po raz pierwszy opisano w publikacji \cite{wang_14}, jej niepełną wersję zaimplementowano także w ukłądzie \textit{FPGA} w ramach pracy inżynierskiej \cite{janus_15}. Jest to algorytm hybrydowy, łączący metodę \textit{Flux Tensor} (opisaną w podrozdziale \ref{subsec:flux_tensor_opis}) oraz zmodyfikowaną metodą \textit{GMM}, nazwaną \textit{Split Gaussian Models} (podrozdział \ref{subsec:split_gaussian_opis}). Zamieszczony w niniejszym rozdziale opis powstał w oparciu o wspomnianą pracę dyplomową, również zrealizowaną w Laboratorium Biocybernetyki AGH.
+Metoda \textit{FTSG}, jak zostało wspomniane w rozdziale \ref{sec:model_inne}, po raz pierwszy opisano w publikacji \cite{wang_14}. 
+Jej niepełną wersję zaimplementowano także w ukłądzie \textit{FPGA} w ramach pracy inżynierskiej \cite{janus_15}. 
+Jest to algorytm hybrydowy, łączący metodę \textit{Flux Tensor} (opisaną w podrozdziale \ref{subsec:flux_tensor_opis}) oraz zmodyfikowaną metodę \textit{GMM}, nazwaną \textit{Split Gaussian Models} (podrozdział \ref{subsec:split_gaussian_opis}). 
+Zamieszczony w niniejszym rozdziale opis powstał w oparciu o wspomnianą pracę dyplomową, również zrealizowaną w Laboratorium Biocybernetyki AGH.
 
 Oba wykorzystane algorytmy zawierają pewne wady, jednak w teorii powinny doskonale się uzupełniać, co skłoniło autorów publikacji do ich jednoczesnego wykorzystania. Metoda \textit{Flux Tensor} umożliwia jedynie wykrywanie obiektów ruchomych, dodatkowo jednak zapewnia bardzo dobrą eliminację zakłóceń spowodowanych zmianami oświetlenia. Przeciwieństwem takiego podejścia jest druga wykorzystana metoda, która będąc bardziej podatną na zakłócenia, umożliwia również detekcję obiektów statycznych.
 
 \subsection{Algorytm Flux Tensor}
 \label{subsec:flux_tensor_opis}
 
-Metoda \textit{Flux Tensor} jest uniwersalnym algorytmem, służącym do wykrywania ruchomych obiektów na obrazie ze statycznie umiejscowionej kamery. Oprócz zastosowania a algorytmie \textit{FTSG}, metoda ta oraz jej implementacja sprzętowa została opisana między innymi w publikacji \cite{janus_16_flux}. Idea tego podejścia opiera się na detekcji krawędzi na obrazie wejściowym oraz wyznaczaniu pochodnej tego obrazu po czasie. Następnie, na podstawie tych dwóch informacji dokonywana jest identyfikacja ruchomych obiektów.
+Metoda \textit{Flux Tensor} jest uniwersalnym algorytmem, służącym do wykrywania ruchomych obiektów na obrazie ze statycznie umiejscowionej kamery. Oprócz zastosowania w~algorytmie \textit{FTSG}, metoda ta oraz jej implementacja sprzętowa zostały opisane między innymi w publikacji \cite{janus_16_flux}. 
+Idea tego podejścia opiera się na detekcji krawędzi na obrazie wejściowym oraz wyznaczaniu pochodnej tego obrazu po czasie. 
+Następnie, na podstawie tych dwóch informacji dokonywana jest identyfikacja obiektów ruchomych.
 
-W opisywanym wariancie, algorytm operuje jedynie na obrazie w skali szarości. Przyjmijmy następujące oznaczenia: $x$, $y$ -- współrzędne piksela na obrazie, $t$ -- czas, wektor w przestrzeni $(x,y,t)$ zapiszmy jako $v$, natomiast wartość piksela wejściowego jako $I(v)$. Kolejnym krokiem jest zdefiniowanie macierzy \textit{Flux Tensor}, opisującej zmiany wartości piksela wejściowego w lokalnej czasoprzestrzeni. Oznaczmy przez $\Omega$ otoczenie w przestrzeni $(x,y,t)$, które jest rozważane przy analizie danego piksela. Macierz \textit{Flux Tensor} została opisana równaniem (\ref{equ:flux_matrix}).
+W opisywanym wariancie algorytm operuje jedynie na obrazie w skali szarości. 
+Przyjmijmy następujące oznaczenia: $x$, $y$ -- współrzędne piksela na obrazie, $t$ -- czas, wektor w przestrzeni $(x,y,t)$ zapiszmy jako $v$, natomiast wartość piksela wejściowego jako $I(v)$. 
+Kolejnym krokiem jest zdefiniowanie macierzy \textit{Flux Tensor}, opisującej zmiany wartości piksela wejściowego w lokalnej czasoprzestrzeni. 
+Oznaczmy przez $\Omega$ otoczenie w przestrzeni $(x,y,t)$, które jest rozważane przy analizie danego piksela. 
+Macierz \textit{Flux Tensor} została opisana równaniem (\ref{equ:flux_matrix}).
 
 \begin{equation}
 			J_F(i) = 
@@ -804,7 +821,11 @@ W opisywanym wariancie, algorytm operuje jedynie na obrazie w skali szarości. P
 \label{equ:flux_matrix}
 \end{equation}
 
-Następnym etapem jest wyznaczenie śladu (sumy elementów na przekątnej) opisanej macierzy. Na tej podstawie dokonywana jest ostateczna klasyfikacja piksela. Jeżeli otrzymana wartości jest większa od wartości progowej $T$, to piksel zostaje uznany za ruchomy. W przeciwnym wypadku zakładamy, że jest to element statyczny. Przyjmijmy uproszczone oznaczenia:
+Następnym etapem jest wyznaczenie śladu (sumy elementów na przekątnej) opisanej macierzy. 
+Na tej podstawie dokonywana jest ostateczna klasyfikacja piksela. 
+Jeżeli otrzymana wartości jest większa od wartości progowej $T$, to piksel zostaje uznany za ruchomy. 
+W przeciwnym wypadku zakładamy, że jest to element statyczny. 
+Przyjmijmy uproszczone oznaczenia:
 
 \begin{equation}
 	I_{xt}=\frac{\partial^2I(x,y,t)}{\partial x\partial t},\quad I_{yt}=\frac{\partial^2I(x,y,t)}{\partial y			\partial t},\quad I_{tt}=\frac{\partial^2I(x,y,t)}{\partial^2 t}	
@@ -818,7 +839,13 @@ Wykorzystując zależności opisane w (\ref{equ:flux_components}), ślad macierz
 \label{equ:flux_trace}
 \end{equation}
 
-Wszystkie elementy koniecznie do wyliczenia wartości danej równaniem (\ref{equ:flux_trace}) są wyznaczane przy użyciu operacji konwolucji. Do obliczania składowej $I_{xt}$ wykorzystuje się filtry różniczkujące dla składowych $x$ i $t$, oraz filtr wygładzający dla składowej $y$. Analogicznie, w przypadku $I_{yt}$ używany jest filtr wygładzający dla składowej $x$. Ostatnim elementem jest składowa $I_{tt}$. Tutaj wykorzystuje się filtr wygładzający dla składowych $x$ i $y$. W operacji całkowania wykorzystuje się natomiast jednowymiarowe filtry uśredniające. Schemat ilustrujący wszystkie etapy został przedstawiony na rysunku \ref{fig:flux_operation_flow}.
+Wszystkie elementy koniecznie do wyliczenia wartości danej równaniem (\ref{equ:flux_trace}) są wyznaczane przy użyciu operacji konwolucji. 
+Do obliczania składowej $I_{xt}$ wykorzystuje się filtry różniczkujące dla składowych $x$ i $t$ oraz filtr wygładzający dla składowej $y$. 
+Analogicznie, w przypadku $I_{yt}$ używany jest filtr wygładzający dla składowej $x$. 
+Ostatnim elementem jest składowa $I_{tt}$. 
+Tutaj wykorzystuje się filtr wygładzający dla składowych $x$ i $y$. 
+W operacji całkowania wykorzystuje się natomiast jednowymiarowe filtry uśredniające. 
+Schemat ilustrujący wszystkie etapy został przedstawiony na rysunku \ref{fig:flux_operation_flow}.
 
     \begin{figure}[h!]
 	\centering
@@ -836,7 +863,8 @@ Wszystkie elementy koniecznie do wyliczenia wartości danej równaniem (\ref{equ
 	\item[$At$] filtr uśredniający czasowy\\
 \end{eqwhere}
 
-Wygładzanie obrazu został zrealizowane poprzez filtr Gaussa ($\sigma = 3$). Różniczkę, w zależności od dobranej szerokości filtra, wyznacza się z wykorzystaniem następujących masek:
+Wygładzanie obrazu został zrealizowane poprzez filtr Gaussa ($\sigma = 3$). 
+Różniczkę, w zależności od dobranej szerokości filtra, wyznacza się z wykorzystaniem następujących masek:
 \begin{eqwhere}[2cm]
 	\item[$n=3$] [$-\frac{1}{2}$, $0$, $\frac{1}{2}$]
 	\item[$n=5$] [$\frac{1}{12}$, $-\frac{2}{3}$, $0$, $\frac{2}{3}$, $-\frac{1}{12}$]
@@ -855,16 +883,33 @@ Po dokonaniu pewnych uproszczeń i założenia, że maski dla osi $x$ i $y$ maj�
 \subsection{Algorytm Split Gaussian Models}
 \label{subsec:split_gaussian_opis}
 
-Metoda \textit{Split Gaussian Models} opisana w \cite{janus_15} to zmodyfikowana wersja algorytmu \textit{GMM}. Zamiast jednego zestawu rozkładów Gaussa, składającego się z $K$ elementów, zdecydowano się wykorzystać dwa osobne modele, jeden reprezentujący tło i drugi pierwszoplanowy. Pierwszy z nich składa się ze zmiennej liczby rozkładów, natomiast drugi zawiera tylko jeden rozkład Gaussa. Test dopasowania do modelu tła uznawany jest za pozytywny, jeżeli piksel pasuje do chociaż jednego z rozkładów znajdujących się w modelu. W przypadku modelu pierwszoplanowego, piksel uznawany jest za element pierwszego planu jeżeli pasuje do rozkładu, w przeciwnym razie jest klasyfikowany jako element tła. Sam test dopasowania przeprowadzany jest identycznie jak w przypadku standardowej metody \textit{GMM}, przy użyciu wzoru (\ref{equ:gmm_mahalanobis}).
+Metoda \textit{Split Gaussian Models} opisana w \cite{janus_15} to zmodyfikowana wersja algorytmu \textit{GMM}. 
+Zamiast jednego zestawu rozkładów Gaussa, składającego się z $K$ elementów, zdecydowano się wykorzystać dwa osobne modele -- jeden reprezentujący tło i drugi obiekty pierwszoplanowe. 
+Pierwszy z nich składa się ze zmiennej liczby rozkładów, natomiast drugi zawiera tylko jeden rozkład Gaussa. 
+Test dopasowania do modelu tła uznawany jest za pozytywny, jeżeli piksel pasuje do chociaż jednego z rozkładów znajdujących się w modelu.
+W przypadku modelu pierwszoplanowego, piksel uznawany jest za element pierwszego planu jeżeli pasuje do rozkładu, w przeciwnym razie jest klasyfikowany jako element tła. 
+Sam test dopasowania przeprowadzany jest identycznie jak w przypadku standardowej metody \textit{GMM}, przy użyciu wzoru (\ref{equ:gmm_mahalanobis}).
 
-Oprócz definicji rozkładów Gaussa zmieniony został również proces aktualizacji modeli. Aktualizacja modelu tła wykonywana jest tylko wtedy, gdy piksel został sklasyfikowany jako tło. Analogicznie warunkiem aktualizacji modelu pierwszego planu jest sklasyfikowanie piksela jako pierwszoplanowego. Ostateczna decyzja o klasyfikacji piksela podejmowana jest po dokonaniu fuzji obu algorytmów, procedura ta została szczegółowo opisana w rozdziale \ref{subsec:ftgs_fuzja}. Dodatkowo wprowadzono także próg $T_l$, rozkłady których waga osiągnie wartość niższą od tego progu zostają usunięte.
+Oprócz definicji rozkładów Gaussa zmieniony został również proces aktualizacji modeli. 
+Jest ona wykonywana tylko wtedy, gdy piksel został sklasyfikowany jako tło. 
+Analogicznie warunkiem aktualizacji modelu pierwszego planu jest sklasyfikowanie piksela jako pierwszoplanowego. 
+Ostateczna decyzja o~klasyfikacji piksela podejmowana jest po dokonaniu fuzji obu algorytmów. 
+Procedura ta została szczegółowo opisana w rozdziale \ref{sec:ftsg_fuzja}. 
+Dodatkowo wprowadzono także próg $T_l$, rozkłady których waga osiągnie wartość niższą od tego progu zostają usunięte.
 
-Dwa równolegle działające modele dają także możliwość wykorzystania dwóch zestawów parametrów. W tym przypadku najistotniejsza jest stała uczenia $\alpha$. W celu lepszej detekcji obiektów statycznych, jej wartość dla modelu tła powinna być jak najmniejsza. Odwrotna sytuacja występuje w przypadku modelu pierwszego planu, tutaj wskazana jest wyższa wartość, gdyż pozwala to częściowo zniwelować efekt duchów. Dodatkowo można także manipulować stałą $k$ wykorzystywaną w teście dopasowania (\ref{equ:gmm_mahalanobis}). Dla modelu tła przyjmuje się zazwyczaj $k=3$, natomiast w modelu pierwszoplanowym, optymalna wartość to $k=20$. 
+Dwa równolegle działające modele dają także możliwość wykorzystania dwóch zestawów parametrów. 
+W tym przypadku najistotniejsza jest stała uczenia $\alpha$. 
+W celu lepszej detekcji obiektów statycznych, jej wartość dla modelu tła powinna być jak najmniejsza. 
+Odwrotna sytuacja występuje w przypadku modelu pierwszego planu, tutaj wskazana jest wyższa wartość, gdyż pozwala to częściowo zniwelować efekt duchów. 
+Dodatkowo można także manipulować stałą $k$ wykorzystywaną w teście dopasowania (\ref{equ:gmm_mahalanobis}). 
+Dla modelu tła przyjmuje się zazwyczaj $k=3$, natomiast w modelu pierwszoplanowym, optymalna wartość to $k=20$. 
 
 \section{Fuzja metody Flux Tensor i Split Gaussian Models}
 \label{sec:ftsg_fuzja}
 
-Schemat przedstawiający sposób połączenia obu algorytmów został zaprezentowany na rysunku \ref{fig:ftsg_flow}. Do analizy obrazu wykorzystywane są jednocześnie trzy modele: \textit{Flux Tensor}, model tła ze zmienną liczbą rozkładów Gaussa oraz model pierwszoplanowy zawierający jeden rozkład Gaussa. W pierwszym etapie analizowany jest wynik jedynie z dwóch pierwszych modułów. Finalna maska binarna została zapisana równaniem (\ref{equ:ftsg_final_mask}).
+Schemat przedstawiający sposób połączenia obu algorytmów został zaprezentowany na rysunku \ref{fig:ftsg_flow}. 
+Do analizy obrazu wykorzystywane są jednocześnie trzy modele: \textit{Flux Tensor}, model tła ze zmienną liczbą rozkładów Gaussa oraz model pierwszoplanowy zawierający jeden rozkład Gaussa. 
+W pierwszym etapie analizowany jest wynik jedynie z dwóch pierwszych modułów. Finalna maska binarna została zapisana równaniem (\ref{equ:ftsg_final_mask}).
 
 \begin{equation}
     F= 
@@ -889,8 +934,19 @@ gdzie:
 				\label{fig:ftsg_flow}
 		\end{figure}
 
-W sytuacji, gdy wynik klasyfikacji dla obu metod jest identyczny, sprawa ostatecznej przynależności jest oczywista. Piksel zostaje uznany za obiekt jeżeli $F_F = 1 \land F_B = 1$ lub za statyczne tło ($F_F = 0 \land F_B = 0$). Jeżeli wyniki obu modeli są sprzeczne konieczna jest dodatkowa analiza. Prostszy przypadek występuje w sytuacji, gdy metoda \textit{Flux Tensor} oznaczy piksel jako element pierwszego planu i jednocześnie pasuje on do modelu tła. Ostatecznie piksel klasyfikowany jest wtedy jako tło. Taka decyzja jest podejmowana, ponieważ algorytm \textit{Flux Tensor} zawsze zaznacza obiekty o trochę większym obszarze niż są one w rzeczywistości (tzw.~efekt halo). Z uwagi na fakt, że metoda wykorzystująca rozkłady Gaussa wykrywa zarówno obiekty statyczne jak i ruchome, nie występuje ryzyko utraty danych.
+W sytuacji, gdy wynik klasyfikacji dla obu metod jest identyczny, sprawa ostatecznej przynależności jest oczywista. 
+Piksel zostaje uznany za obiekt jeżeli $F_F = 1 \land F_B = 1$ lub za statyczne tło ($F_F = 0 \land F_B = 0$). 
+Jeżeli wyniki obu modeli są sprzeczne konieczna jest dodatkowa analiza. 
+Prostszy przypadek występuje w sytuacji, gdy metoda \textit{Flux Tensor} oznaczy piksel jako element pierwszego planu i jednocześnie pasuje on do modelu tła. 
+Ostatecznie piksel klasyfikowany jest wtedy jako tło. 
+Taka decyzja jest podejmowana, ponieważ algorytm \textit{Flux Tensor} zawsze zaznacza obiekty o trochę większym obszarze niż są one w rzeczywistości (tzw.~efekt halo). 
+Z uwagi na fakt, że metoda wykorzystująca rozkłady Gaussa wykrywa zarówno obiekty statyczne jak i ruchome, nie występuje ryzyko utraty danych.
 
-Bardziej skomplikowana jest sytuacja odwrotna, czyli $F_F = 0 \land F_B = 1$. Tutaj konieczne jest wykorzystanie modelu pierwszoplanowego i na jego podstawie podejmowana jest ostateczna decyzja. Jeżeli piksel pasuje do modelu to zostaje zaklasyfikowany jako statyczny obiekt pierwszoplanowy, w~przeciwnym przypadku jako tło. Takie podejście pozwala zredukować znaczą ilość szumów powstałych na masce wyjściowej w skutek zmian oświetlenie i innych zakłóceń.
+Bardziej skomplikowana jest sytuacja odwrotna, czyli $F_F = 0 \land F_B = 1$. 
+Tutaj konieczne jest wykorzystanie modelu pierwszoplanowego i na jego podstawie podejmowana jest ostateczna decyzja. 
+Jeżeli piksel pasuje do modelu to zostaje zaklasyfikowany jako statyczny obiekt pierwszoplanowy, w~przeciwnym przypadku jako tło. 
+Takie podejście pozwala zredukować znaczą liczbę szumów powstałych na masce wyjściowej w skutek zmian oświetlenie i innych zakłóceń.
 
-W oryginalnej publikacji przedstawiającej omawianą metodę \cite{wang_14} autorzy zaproponowali jeszcze dodatkowy mechanizm detekcji obiektów statycznych, bardzo podobny do tego zrealizowanego w algorytmie \textit{PBAS} (rozdział \ref{subsec:pbas_duchy}). Implementacja sprzętowa opracowana w Laboratorium Biocybernetyki AGH w ramach pracy dyplomowej \cite{janus_15} zawiera pewne uproszczenia w stosunku do oryginału. Jedną z~najistotniejszych modyfikacji było zrezygnowanie ze zmiennej liczby rozkładów Gaussa w modelu tła, zamiast tego wykorzystano podejście podobne do standardowego algorytmu \textit{GMM}.
+W oryginalnej publikacji przedstawiającej omawianą metodę \cite{wang_14} autorzy zaproponowali jeszcze dodatkowy mechanizm detekcji obiektów statycznych, bardzo podobny do tego zrealizowanego w algorytmie \textit{PBAS} (rozdział \ref{subsec:pbas_duchy}). 
+Implementacja sprzętowa opracowana w Laboratorium Biocybernetyki AGH w ramach pracy dyplomowej \cite{janus_15} zawiera pewne uproszczenia w stosunku do oryginału. 
+Jedną z~najistotniejszych modyfikacji było zrezygnowanie ze zmiennej liczby rozkładów Gaussa w modelu tła, zamiast tego wykorzystano podejście podobne do standardowego algorytmu \textit{GMM}.

@@ -5,12 +5,12 @@
 \label{sec:metodologia_testow}
 
 Testy algorytmów zaimplementowanych w Laboratorium Biocybernetyki AGH zostały przeprowadzone zgodnie z metodologią opisaną w \cite{changedetection_15}. 
-%%TODO one nie zostały opracowane na AGH...
 Sekwencje testowe pochodzą z bazy \textit{ChangeDetection} \cite{change_detection_web}. 
-Tego typu podejście do ewaluacji zaimplementowanych algorytmów zostało wykorzystane między innymi w~\cite{kryjak_14_vibe, kryjak_14_pbas, janus_15}. 
+Tego typu podejście do ewaluacji zaimplementowanych algorytmów zostało wykorzystane między innymi w~\cite{janus_15, kryjak_14_pbas, kryjak_14_vibe}. 
 Wszystkie metody zostały przetestowane z wykorzystaniem 31 sekwencji testowych podzielonych na 6 różnych kategorii. 
-Zbiór testowy został tak dobrany, aby odwzorować jak największą liczbę sytuacji mogących wystąpić w rzeczywistych warunkach. %%TODO środowisku czego ?
-Każda z kategorii została szczegółowo opisana w rozdziale \ref{sec:testy}. Wszystkie testy przeprowadzono z wykorzystaniem modeli programowych, opisanych w rozdziale \ref{sec:modele_programowe}.
+Zbiór testowy został tak dobrany, aby odwzorować jak największą liczbę sytuacji mogących wystąpić w rzeczywistych warunkach. 
+Każda z kategorii została szczegółowo opisana w rozdziale \ref{sec:testy}. 
+Wszystkie testy przeprowadzono z wykorzystaniem modeli programowych, opisanych w rozdziale \ref{sec:modele_programowe}.
 
 Dla każdej sekwencji testowej zawartej w bazie, dostępny jest model wzorcowy tj. ręcznie anotowana maska obiektów (ang. \textit{ground truth}).
 Wzorzec zapisany jest jako obraz w skali szarości, gdzie piksele przyjmują jedną z pięciu wartości:
@@ -47,12 +47,12 @@ Wzorzec zapisany jest jako obraz w skali szarości, gdzie piksele przyjmują jed
 Parametr \textit{Re} definiuje jaki procent pikseli pierwszoplanowych został rozpoznany. 
 Analogiczną wartość dla pikseli reprezentujących tło określa parametr \textit{Se}. 
 Parametry \textit{FPR} i \textit{FNR} są przeciwieństwem wartości opisanych wyżej i wynoszą odpowiednio $1-Se$ i $1-Re$. 
-\textit{PWC} określa procent źle sklasyfikowany pikseli, natomiast \textit{Pr} informuje jaki procent spośród pikseli sklasyfikowanych jako pierwszoplanowe został rozpoznany prawidłowo. Ostatnim wskaźnikiem jest \textit{F1} (\textit{F-measure}), został wykorzystany, ponieważ według autorów przedstawionej metodologi, jego wartość najlepiej koreluje z wartością średnią wszystkich pozostałych wskaźników.
-%%TODO zdanie o F1
+\textit{PWC} określa procent źle sklasyfikowany pikseli, natomiast \textit{Pr} informuje jaki procent spośród pikseli sklasyfikowanych jako pierwszoplanowe został rozpoznany prawidłowo. 
+Ostatnim wskaźnikiem jest \textit{F1} (\textit{F-measure}), został wykorzystany, ponieważ według autorów przedstawionej metodologi, jego wartość najlepiej koreluje z wartością średnią wszystkich pozostałych wskaźników.
+
 
 \section{Szczegółowe testy}
 \label{sec:testy}
-%%TODO test -> testy ?
 
 \subsection{Sekwencje podstawowe}
 \label{subsec:sewkencje_podstawowe}
@@ -65,7 +65,7 @@ Dzięki temu może stanowić dobry punkt odniesienia dla dalszych testów.
 Dwie spośród wykorzystanych sekwencji zawierają głównie obiekty ruchome, natomiast w dwóch kolejnych występują także obiekty zatrzymane. 
 Oprócz tego miejscami pojawiają się cienie oraz dynamiczne tło. 
 Szczegółowe wyniki wykonanych testów przedstawiono w tabeli \ref{tab:baseline}.
-%%TODO dla jakich parametrów, napisać czy to były modele programowe czy co ? floating, fixed itp ? - pierwszy akapit
+
 
     \begin{figure}[h]
 			\centering
@@ -97,7 +97,7 @@ Szczegółowe wyniki wykonanych testów przedstawiono w tabeli \ref{tab:baseline
 			\hline
 			\textit{PBAS+} & \num{0.9075} & \num{0.9965} & \num{0.0035} & \num{0.0925} & \num{0.58} & \num{0.8998} & \num{0.8932} \\
 			\hline 		
-			\textit{GMM} & \num{0.5235} & \num{0.9703} & \num{0.0296} & \num{0.4764} & \num{5.32} & \num{0.5376} & \num{0.5604} \\
+			\textit{GMM} & \num{0.4711} & \num{0.9503} & \num{0.0497} & \num{0.5289} & \num{5.85} & \num{0.5266} & \num{0.5401} \\
 			\hline
 			\end{tabular}
 			}		
@@ -106,7 +106,7 @@ Szczegółowe wyniki wykonanych testów przedstawiono w tabeli \ref{tab:baseline
 
 Spośród prostych algorytmów, zdecydowanie najlepszy wynik uzyskano przy wykorzystaniu metody naiwnej. 
 Odejmowanie ramek oraz średnia krocząca zwracają już zdecydowanie gorsze rezultaty. 
-Jak zostało już wspomniane w części teoretycznej (rozdział \ref{sec:proste_metody}), są to algorytmy nadające się głównie do detekcji obiektów ruchomych, stąd też zdecydowanie gorszy wynik. %%TODO brak ref
+Jak zostało już wspomniane w części teoretycznej (rozdział \ref{sec:proste_metody}), są to algorytmy nadające się głównie do detekcji obiektów ruchomych, stąd też zdecydowanie gorszy wynik.
 Dla większości testowanych algorytmów można zaobserwować stosunkowo wysoką wartość wskaźników \textit{Spec} i \textit{Prec} oraz niewielką wartość \textit{PWC}, co oznacza bardzo dobrą eliminację szumów. 
 
 Wartym uwagi jest fakt, że dla standardowej wersji algorytmu \textit{PBAS} otrzymano gorsze wartości wskaźników niż dla metody \textit{ViBE}. 
@@ -155,7 +155,7 @@ Otrzymane dla poszczególnych algorytmów rezultaty zamieszczono tabelach \ref{t
 			\hline
 			\textit{PBAS+} & \num{0.9396} & \num{0.9748} & \num{0.0252} & \num{0.0604} & \num{2.5478} & \num{0.6187} & \num{0.5567} \\
 			\hline 		
-			\textit{GMM} & \num{0.5467} & \num{0.9428} & \num{0.0572} & \num{0.4533} & \num{6.2624} & \num{0.2669} & \num{0.2009} \\
+			\textit{GMM} & \num{0.4920} & \num{0.9318} & \num{0.0682} & \num{0.5080} & \num{6.5724} & \num{0.2459} & \num{0.2001} \\
 			\hline
 			\end{tabular}
 			}		
@@ -170,8 +170,9 @@ Wyniki niższe od pozostałych uzyskano również dla algorytmów \textit{GMM} i
 
 Niestety w większości przypadków uzyskano również zdecydowanie niższą wartość wskaźnika \textit{Prec} i \textit{PWC}, co oznacza, że dynamicznie poruszające się elementy w tle zostały mylnie zaklasyfikowane jako pierwszy plan. 
 Szczególnie widoczne jest to dla metody naiwnej, natomiast najlepiej pod tym względem wypadły algorytmy \textit{ViBE} oraz \textit{PBAS}. 
-Warto zaznaczyć, że rozszerzona wersja metody \textit{PBAS} charakteryzuje się zdecydowanie słabszą zdolnością wyodrębniania dynamicznego tła od statycznego planu, jednak zapewnia lepszą dokładność w wykrywaniu prawdziwych obiektów pierwszoplanowych (wyższa wartość wskaźnika \textit{recall}). Najprawdopodobniej, jest to spowodowane tym, że dynamiczne elementy tła czasami mylnie są identyfikowane jako statyczne obiekty pierwszoplanowe.
-%%TODO a może Pan przemyśleć dlaczego tak się dzieje ?
+Warto zaznaczyć, że rozszerzona wersja metody \textit{PBAS} charakteryzuje się zdecydowanie słabszą zdolnością wyodrębniania dynamicznego tła od statycznego planu, jednak zapewnia lepszą dokładność w wykrywaniu prawdziwych obiektów pierwszoplanowych (wyższa wartość wskaźnika \textit{recall}). 
+Najprawdopodobniej, jest to spowodowane tym, że dynamiczne elementy tła czasami mylnie są identyfikowane jako statyczne obiekty pierwszoplanowe.
+
 
 	\begin{table}[h]
 		\centering
@@ -196,7 +197,7 @@ Warto zaznaczyć, że rozszerzona wersja metody \textit{PBAS} charakteryzuje si�
 			\hline
 			\textit{PBAS+} & \num{0.8590} & \num{0.9881} & \num{0.0119} & \num{0.1410} & \num{1.8909} & \num{0.7903} & \num{0.7479} \\
 			\hline 		
-			\textit{GMM} & \num{0.5478} & \num{0.9949} & \num{0.0051} & \num{0.4522} & \num{3.2416} & \num{0.6605} & \num{0.8510} \\
+			\textit{GMM} & \num{0.5261} & \num{0.9849} & \num{0.0151} & \num{0.4739} & \num{3.3636} & \num{0.6425} & \num{0.8312} \\
 			\hline
 			\end{tabular}
 			}		
@@ -241,13 +242,13 @@ Przykładową sekwencję zamieszczono na rysunku \ref{fig:jitter_example}, natom
 			\hline
 			\textit{ViBE} & \num{0.7510} & \num{0.9371} & \num{0.0629} & \num{0.2490} & \num{6.9322} & \num{0.5119} & \num{0.3964} \\
 			\hline
-			\textit{ViBE+} & \num{0.7510} & \num{0.9371} & \num{0.0629} & \num{0.2490} & \num{6.9322} & \num{0.5119} & \num{0.3964} \\
+			\textit{ViBE+} & \num{0.5510} & \num{0.8941} & \num{0.1059} & \num{0.4490} & \num{10.8422} & \num{0.4264} & \num{0.3182} \\
 			\hline
             \textit{PBAS} & \num{0.6523} & \num{0.9843} & \num{0.0157} & \num{0.3477} & \num{2.7535} & \num{0.6416} & \num{0.6382} \\
 			\hline
 			\textit{PBAS+} & \num{0.8907} & \num{0.8889} & \num{0.1111} & \num{0.1093} & \num{11.0708} & \num{0.4072} & \num{0.2697} \\
 			\hline 		
-			\textit{GMM} & \num{0.5998} & \num{0.9098} & \num{0.0902} & \num{0.4002} & \num{10.7799} & \num{0.4128} & \num{0.3210} \\
+			\textit{GMM} & \num{0.5348} & \num{0.9017} & \num{0.0983} & \num{0.4652} & \num{11.7679} & \num{0.3925} & \num{0.3107} \\
 			\hline
 			\end{tabular}
 			}		
@@ -255,16 +256,13 @@ Przykładową sekwencję zamieszczono na rysunku \ref{fig:jitter_example}, natom
 	\end{table}
 	
 Oprócz testowanych wcześniej algorytmów, w tym przypadku ewaluacji poddano także rozszerzoną wersje metody \textit{ViBE}, zawierającą dodatkowy mechanizm redukcji efektu ruchomej kamery. 
-Niestety, zaimplementowane rozwiązanie nie zdało egzaminu i dla wykorzystanych sekwencji testowych uzyskany wynik jest niezadowalający. Według autorów algorytm został przygotowany z myślą o zastosowaniu w kamerach typu \textit{PTZ} (ang. \textit{pan–tilt–zoom camera}). Wymagania systemu działającego z tego typu urządzeniem częściowo pokrywają się z tym czego wymagamy od algorytmu redukującego drgania kamery. W związku z tym zdecydowano się przetestować zaproponowane rozwiązanie właśnie w takim środowisku, uwzględniając jednak, że docelowe zastosowanie było inne, uzyskanego wyniku nie należy traktować jak niespełniającego wymagań.
+Niestety, zaimplementowane rozwiązanie nie zdało egzaminu i dla wykorzystanych sekwencji testowych uzyskany wynik jest niezadowalający. Według autorów algorytm został przygotowany z myślą o zastosowaniu w~kamerach typu \textit{PTZ} (ang. \textit{pan–tilt–zoom camera}). Wymagania systemu działającego z tego typu urządzeniem częściowo pokrywają się z tym czego wymagamy od algorytmu redukującego drgania kamery. W~związku z tym zdecydowano się przetestować zaproponowane rozwiązanie właśnie w takim środowisku, uwzględniając jednak, że docelowe zastosowanie było inne, uzyskanego wyniku nie należy traktować jak niespełniającego wymagań.
 %Implementacja algorytmu została przygotowana z myślą o pracy w rzeczywistym środowisku i w rozdzielczości \textit{576p@50fps}. 
 %W przypadku przeprowadzanych testów obraz wejściowy jest dużo gorszej jakości. 
 %Opracowana koncepcja obliczania przepływu optycznego, zakładająca dzielenie obrazu na równe bloki o rozmiarze $32x32$ nie daje akceptowalnych rezultatów dla niższych rozdzielczości. 
-%%TODO analizował Pan to jakoś bardziej ? Jak tak to proszę jeszcze to rozwinąć.
 Pozostałe algorytmy uzyskały niskie wartości wskaźnika \textit{prec} oraz wysoki procent źle sklasyfikowanych pikseli (\textit{PWC}). 
-Jest to naturalny efekt drgań kamery, ponieważ w takim przypadku niemal cały obraz interpretowany jest jako pierwszy plan.
+Jest to naturalny efekt drgań kamery, ponieważ w~takim przypadku niemal cały obraz interpretowany jest jako pierwszy plan.
 
-%%TODO z tego co pamiętam... to był raczej płynny ruch kamery a nie wprost drgania. Zatem może też o to chodzi...
-%%TODO bo to ogolnie miało być do takiej kamery PTZ
 Przygotowana implementacja algorytmu \textit{ViBE}, została początkowo opracowana w Laboratorium Biocybernetyki AGH i po raz pierwszy opublikowana w artykule \cite{kryjak_14_vibe}. 
 Autorzy tej publikacji zaproponowali alternatywny sposób przetestowania przygotowanego rozwiązania. 
 Koncepcja ta zakłada testowanie metody w rzeczywistych warunkach, w trzech różnych sytuacjach oznaczanych dalej jako \textit{C1, C2, C3}:\\
@@ -350,7 +348,7 @@ Przykładowa sekwencja z tej kategorii została pokazana na rysunku \ref{fig:sto
 			\hline
 			\textit{PBAS+} & \num{0.8048} & \num{0.9868} & \num{0.0132} & \num{0.1952} & \num{2.1968} & \num{0.7778} & \num{0.7847} \\
 			\hline 		
-			\textit{GMM} & \num{0.3403} & \num{0.9719} & \num{0.0281} & \num{0.6597} & \num{10.2164} & \num{0.4108} & \num{0.6682} \\
+			\textit{GMM} & \num{0.3113} & \num{0.9629} & \num{0.0371} & \num{0.6887} & \num{11.1263} & \num{0.4005} & \num{0.6182} \\
 			\hline
 			\end{tabular}
 			}		
@@ -360,7 +358,6 @@ Przykładowa sekwencja z tej kategorii została pokazana na rysunku \ref{fig:sto
 Na podstawie uzyskanych wyników można zauważyć, że testowane algorytmy nie dają zbyt dobrych rezultatów. 
 W większości przypadków występuje niska wartość wskaźnika \textit{recall} oraz duża wartość \textit{PWC}, co oznacza, że wiele spośród statycznych obiektów zostało wtopionych w model tła. 
 Ponownie zaskakująco dużą dokładność uzyskano dla metody naiwnej.  
-%%TODO no bo pewnie dlatego ze na poczatku scena była pusta
 Otrzymane wskaźniki są na podobnym poziomie co te uzyskane dla algorytmu \textit{ViBE}. Taki rezultat należy jednak traktować jako przypadek, spowodowany faktem, że scena w pierwszej ramce obrazu była pusta. W rzeczywistych warunkach algorytm ten nie zapewnia zadowalających wyników.
 Metody \textit{PBAS} w wersji podstawowej oraz zawierającej dodatkowy mechanizm detekcji obiektów statycznych (\textit{PBAS+}) zostały porównane niezależnie od reszty. 
 Wyniki zawierające rezultaty obu algorytmów dla poszczególnych sekwencji z tej kategorii zamieszczono w tabeli \ref{tab:pbas_plus_intermittent}.
@@ -405,7 +402,6 @@ Wyniki zawierające rezultaty obu algorytmów dla poszczególnych sekwencji z te
 Po dokonaniu analizy otrzymanych wyników można śmiało stwierdzić, że zaimplementowany mechanizm spełnia swoje zadanie. 
 Rezultaty osiągnięte przez algorytm \textit{PBAS+} są zdecydowanie lepsze niż innych algorytmów, dodatkowo widać olbrzymią poprawę w stosunku do standardowej wersji tej metody. 
 Należy zaznaczyć, że w niektórych przypadkach statyczny obiekt umieszczony był daleko od kamery, na drugim planie. Skutkowało to jego niewielkim rozmiarem co stanowiło dodatkowe utrudnienie dla algorytmu.
-%%TODO co to znaczy daleko w tle ? że był o niewielkim rozmiarze ?
 Przykładem takiej sekwencji jest \textit{parking}. 
 Mimo takich utrudnień uzyskany wyniki można uznać za zadowalający. 
 Drugą bardzo skomplikowaną do analizy sekwencją jest \textit{sofa}, gdzie za największą trudność należy uznać zbliżoną kolorystykę obiektów. 
@@ -450,7 +446,7 @@ Wyniki przeprowadzonych testów dla poszczególnych algorytmów zamieszczono w t
 			\hline
 			\textit{PBAS+} & \num{0.4236} & \num{0.9976} & \num{0.0024} & \num{0.5764} & \num{4.8207} & \num{0.5507} & \num{0.8981} \\
 			\hline 		
-			\textit{GMM} & \num{0.3563} & \num{0.9983} & \num{0.0017} & \num{0.6415} & \num{5.5093} & \num{0.5041} & \num{0.9374} \\
+			\textit{GMM} & \num{0.3353} & \num{0.9933} & \num{0.0077} & \num{0.6647} & \num{6.7093} & \num{0.5491} & \num{0.9134} \\
 			\hline
 			\end{tabular}
 			}		
@@ -494,7 +490,7 @@ Dla każdego algorytmu wartość wskaźnika \textit{prec} jest wyraźnie niższa
 			\hline
 			\textit{PBAS+} & \num{0.8042} & \num{0.9721} & \num{0.0279} & \num{0.1958} & \num{3.8507} & \num{0.6741} & \num{0.6917} \\
 			\hline 		
-			\textit{GMM} & \num{0.4940} & \num{0.9693} & \num{0.0307} & \num{0.5056} & \num{6.4052} & \num{0.4932} & \num{0.6491} \\
+			\textit{GMM} & \num{0.4693} & \num{0.9402} & \num{0.0597} & \num{0.5307} & \num{6.7255} & \num{0.4685} & \num{0.6166} \\
 			\hline	
             \textit{FTSG}\cite{wang_14} & \num{0.8400} & \num{0.9940} & \num{0.0060} & \num{0.1620} & \num{1.1200} & \num{0.8400} & \num{0.8700} \\
             \hline
@@ -515,17 +511,14 @@ Zdecydowanie najlepiej z sekwencjami testowymi poradził sobie algorytm \textit{
 Uzyskano wysoki procent rozpoznanych obiektów pierwszoplanowych (parametr \textit{recall}), przy zachowaniu dobrej dokładności i niewielkim procencie źle rozpoznanych pikseli (parametry \textit{prec} i~\textit{PWC}). 
 Takie wyniki oznaczają, że mechanizm indeksacji, połączony z analizą krawędzi poprawia jakość detekcji nie tylko w przypadku obiektów statycznych. 
 
-Kolejną wartą uwagi obserwacją jest fakt, że standardowa wersja algorytmu \textit{PBAS}, osiąga słabsze wyniki od metody \textit{ViBE}, mimo że teoretycznie jest jej bardziej rozbudowaną wersją. %%TODO 1. styl, dwa słabsze niż ViBE ? ale tak jest w changedetection ?? przecież nie... choć oni tam coś kombinowali z tym PBAS'em
+Kolejną wartą uwagi obserwacją jest fakt, że standardowa wersja algorytmu \textit{PBAS}, osiąga słabsze wyniki od metody \textit{ViBE}, mimo że teoretycznie jest jej bardziej rozbudowaną wersją. 
 Dodatkowe manipulowanie progiem przynależności i prawdopodobieństwem aktualizacji nie zawsze wpływa pozytywnie na wynik końcowy. 
 Rozczarowujące są również rezultaty otrzymane dla algorytmu \textit{GMM}, szczególnie widoczny jest bardzo wysoki procent źle sklasyfikowanych pikseli \textit{PWC} oraz słaba rozpoznawalność obiektów pierwszoplanowych (parametr \textit{recall}).
 
 Niestety rozszerzona wersja algorytmu \textit{ViBE}, zawierająca dodatkowy mechanizm redukcji ruchu kamery, nie sprawdziła się w testach z wykorzystaniem sekwencji testowych. 
 Autorzy publikacji \cite{kryjak_14_vibe} z~której pochodzi metoda zaproponowali alternatywny sposób przetestowania metody w rzeczywistym środowisku, jedynie z wykorzystaniem ruchomej, nie drgającej kamery. 
 Uzyskane w przeprowadzonym przez nich badaniu rezultaty dały bardzo obiecujące wyniki.
-%%TODO no ale PAn tych wyników już nie powtarzał...
-
 
 W porównaniu do metod zaprezentowanych w innych publikacjach, wyniki najlepszego z zaimplementowanych algorytmów (\textit{PBAS+}) można uznać za zadowalające. 
 Zaprezentowana w publikacji \cite{wang_14} metoda \textit{FTSG} osiąga co prawda zdecydowanie lepsze rezultaty, jednak należy pamiętać, że zawiera ona wiele dodatkowych mechanizmów takich jak na przykład wykrywanie dynamicznego tła. 
-Rezultaty wersji \textit{GMM} przedstawionej w \cite{KaewTraKulPong_01} są bardzo zbliżone do wyników implementacji, która została przedstawiona w niniejszej pracy.
-%%TODO brak odnośnika
+Rezultaty wersji \textit{GMM} przedstawionej w \cite{KaewTraKulPong_01} są bardzo zbliżone do wyników implementacji, która została opisana w~niniejszej pracy.

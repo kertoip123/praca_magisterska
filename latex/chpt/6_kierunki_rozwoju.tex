@@ -11,8 +11,8 @@ Jest to pierwsza implementacja tej metody w układzie reprogramowalnym.
 Nie udało się niestety opracować pełnej wersji, zaproponowanej przez autorów oryginalnej publikacji \cite{wang_14}. 
 Zabrakło między innymi mechanizmu detekcji obiektów statycznych, który według założeń miał być bardzo podobny do tego wykorzystanego w metodzie \textit{PBAS}. 
 Celem przyszłych badań może być próba wykorzystania opracowanego dla algorytmu \textit{PBAS} modułu analizy obiektów \textit{CCA} i zintegrowania go z algorytmem \textit{FTSG}. 
-W celu poprawny dokładności można spróbować także zaimplementować mechanizm indeksacji obiektów w wariancie dwuprzebiegowym.
 %TODO a co Pana zdaniem dałaby ta dwuprzebiegowość ?
+%TODO Uzasadnienie albo out
 
 \section{Wzrost wydajności}
 \label{sec:wzrost_wydajnosci}
@@ -27,7 +27,7 @@ Wraz z postępem technologicznym i pojawianiem się nowych, wydajniejszych ukła
 Docelowo system wizyjny powinien przetwarzać obraz w rozdzielczości \textit{1920x1080} w 50 klatkach na sekundę, w dalszej przyszłości wymaganym standardem może stać się rozdzielczość \textit{4K (3840x2160 pikseli)}.
 
 Wzrost wydajności systemów wizyjnych jest ograniczony przez kilka czynników. 
-Jak zostało już podkreślone jedną z blokad jest aktualnie dostępny sprzęt. %TODO raczej barier...
+Jak zostało już podkreślone jedną z barier jest aktualnie dostępny sprzęt. %TODO raczej barier...
 W niektórych przypadkach ujawnia się ograniczona liczba zasobów logicznych w układzie \textit{FPGA} oraz maksymalna przepustowość pamięci \textit{RAM}. Jednak, aby zapewnić wzrost wydajności nie należy jedynie oczekiwać na postęp technologiczny. Każdy algorytm można w~pewnym stopniu zoptymalizować, poprzez uproszczenie logiki i zredukowanie liczby operacji wykonywanych w jednym cyklu. Taki zabieg może co prawda zwiększyć sumaryczną latencję, ale jednocześnie zapewni wyższą maksymalną częstotliwość pracy zegara. 
 
 
@@ -38,7 +38,7 @@ Mimo stosunkowo zadowalających efektów końcowych przygotowanych implementacji
 W przyszłości należy zastanowić się nad przygotowaniem między innymi dodatkowego mechanizmu detekcji dynamicznego tła i eliminacji jego wpływu na pracę algorytmu. 
 Kolejnym wartym uwagi zagadnieniem jest prawidłowa detekcja cieni i ich odróżnienie od rzeczywistych obiektów. 
 Oba zagadnienia są tematami bardzo rozległymi, które były już częściowo poruszane w ramach badań w Laboratorium Biocybernetyki AGH, jednak nie zostały uwzględnione w niniejszej pracy.
-%TODO akurat oba były :) ale proste nie są... jak Pan wpisze bpp kryjak to Pan znajdzie takie moje artukuły na ten temat.
+
 
 Kolejną drogą rozwoju może być próba tworzenia implementacji sprzętowych istniejących już algorytmów. 
 Autorzy publikacji na różnego rodzaju konferencjach poświęconych systemom wizyjnym prezentują nowatorskie rozwiązania, często jednak nowy algorytm przedstawiany jest jedynie od strony teoretycznej. 
